@@ -71,6 +71,7 @@ function setup(manifest) {
   pages.forEach((page) => page.section.append(buildEndPanel(page)));
   dom.bar = bar;
   dom.list = bar.querySelector(".page-bar__locations");
+  dom.cover = document.querySelector(".cover");
   buildSwitcher();
   bar.hidden = false;
 
@@ -230,6 +231,9 @@ function onPopState() {
 }
 
 function show(page, { scroll, focus }) {
+  // Leaving the contents ends the cover's entrance for this visit, so coming
+  // back shows the cover complete instead of replaying it.
+  if (page && document.body.dataset.page === "contents") dom.cover?.classList.add("is-entered");
   current = page;
   document.body.dataset.page = page ? "location" : "contents";
   for (const p of pages) {
