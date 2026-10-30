@@ -512,6 +512,35 @@ img {
   pointer-events: none;
 }
 
+/* Mouse and trackpad only (phones have no hover): pointing at a photo dims the
+   rest of its chapter and slowly zooms the photo, hinting that it opens */
+@media (hover: hover) and (pointer: fine) {
+  /* Undimming waits a moment, so crossing the gap between two photos doesn't flash */
+  .tile {
+    transition: opacity 0s 150ms;
+  }
+
+  .chapter:has(.tile:hover) .tile:not(:hover) {
+    opacity: 0.55;
+    transition-delay: 0s;
+  }
+
+  .tile:hover {
+    transition-delay: 0s;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tile {
+    transition-duration: 400ms;
+    transition-timing-function: var(--ease-soft);
+  }
+
+  .tile:hover img {
+    transform: scale(1.04);
+  }
+}
+
 /* ==========================================================================
    Photo viewer (always dark)
    ========================================================================== */
@@ -705,7 +734,7 @@ html.viewer-open {
   }
 
   .tile img {
-    transition: opacity 400ms var(--ease-soft);
+    transition: opacity 400ms var(--ease-soft), transform 900ms var(--ease-soft);
   }
 
   .viewer__img {
