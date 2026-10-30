@@ -440,7 +440,7 @@ img {
 }
 
 /* ==========================================================================
-   About us (between the cover and the photos)
+   Our story (between the cover and the location cards)
    ========================================================================== */
 
 .about {
@@ -454,6 +454,11 @@ img {
     var(--space-lg)
     max(var(--space-md), env(safe-area-inset-left));
   outline: none;
+  /* Holds the jigsaw pair behind the text and clips it to the section */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
 }
 
 .about__title {
@@ -487,6 +492,48 @@ img {
 
 .about__story p + p {
   margin-top: 1em;
+}
+
+/* Two pieces from different puzzles that fit together, as in the story:
+   decorative, centred behind the text, sized to the reading column */
+.about__puzzle {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(44rem, 100%);
+  height: auto;
+  /* Never taller than the section; the drawing shrinks evenly inside */
+  max-height: 100%;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.about__piece {
+  vector-effect: non-scaling-stroke;
+}
+
+/* One puzzle: a soft champagne piece */
+.about__piece--a {
+  fill: var(--champagne);
+  fill-opacity: 0.16;
+}
+
+/* The other: pale linen with a fine dotted print and a hairline edge */
+.about__piece--b {
+  fill: url(#about-puzzle-print);
+  stroke: var(--champagne);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+
+.about__print-ground {
+  fill: var(--linen);
+}
+
+.about__print-dot {
+  fill: var(--stone);
+  fill-opacity: 0.16;
 }
 
 /* ==========================================================================
