@@ -77,9 +77,9 @@ body[data-theme="dark"] {
   --color-line: rgba(237, 231, 221, 0.14);
 }
 
-/* Each location tints the page while it's on screen (data-location is set by
-   nav.js from the location's section id; the cover keeps the plain theme).
-   --location-theme tells nav.js which text colours (data-theme) go with it. */
+/* Each location page has its own background (data-location is set by
+   pages.js from the location's section id; the contents keeps the plain theme).
+   --location-theme tells pages.js which text colours (data-theme) go with it. */
 body[data-location="outdoor-beach"] {
   --color-bg: var(--shell);
   --location-theme: light;
@@ -427,62 +427,96 @@ img {
    ========================================================================== */
 
 .photos {
-  min-height: 100vh;
-  min-height: 100svh;
-  /* Side padding lives on .gallery so the sticky nav can span the full width */
+  /* Side padding lives on .gallery so the sticky bar can span the full width */
   padding: 0 0 var(--space-xl);
-  /* Programmatic focus target for the "View photos" link; no visible outline */
   outline: none;
 }
 
 /* ==========================================================================
-   Shoot & location navigation
+   Pages (pages.js): the contents page or one location page at a time
    ========================================================================== */
 
-.shoot-nav {
+body[data-page="location"] .cover,
+body[data-page="location"] .about,
+body[data-page="location"] .locations,
+body[data-page="contents"] .gallery,
+body[data-page="contents"] .page-bar {
+  display: none;
+}
+
+.page-bar[hidden],
+.chapter[hidden] {
+  display: none;
+}
+
+/* Pinned on every location page: "‹ Contents", then a switcher of all locations */
+.page-bar {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding-top: env(safe-area-inset-top);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding:
+    env(safe-area-inset-top)
+    max(var(--space-sm), env(safe-area-inset-right))
+    0
+    max(var(--space-sm), env(safe-area-inset-left));
   background: var(--color-bg);
   border-bottom: 1px solid var(--color-line);
   transition: background-color var(--dur-theme) var(--ease-soft), border-color var(--dur-theme) var(--ease-soft);
 }
 
-.shoot-nav[hidden],
-.shoot-nav__chapters[hidden] {
-  display: none;
+.page-bar__back {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 44px;
+  padding: 0 var(--space-sm) 0 var(--space-xs);
+  border-right: 1px solid var(--color-line);
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-text);
+  text-decoration: none;
 }
 
-.shoot-nav__shoots,
-.shoot-nav__chapters {
+/* Scrolls sideways on narrow screens; the fading trailing edge hints at more */
+.page-bar__locations {
+  flex: 1;
+  min-width: 0;
   display: flex;
+  align-items: center;
   justify-content: safe center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   margin: 0;
-  padding: 0 var(--space-sm);
+  padding: 0;
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
   white-space: nowrap;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
 }
 
-.shoot-nav__shoots::-webkit-scrollbar,
-.shoot-nav__chapters::-webkit-scrollbar {
+.page-bar__locations::-webkit-scrollbar {
   display: none;
 }
 
-/* Keeps the bar the same height for shoots without locations (Studio) */
-.shoot-nav__locations {
-  min-height: 44px;
+@media (min-width: 64rem) {
+  .page-bar__locations {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
-.shoot-nav__link {
+.page-bar__link {
   display: flex;
   align-items: center;
   min-height: 44px;
   padding: 0 var(--space-xs);
-  font-family: var(--font-ui);
   font-size: var(--text-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
@@ -490,11 +524,7 @@ img {
   text-decoration: none;
 }
 
-.shoot-nav__link--shoot {
-  font-size: 0.875rem;
-}
-
-.shoot-nav__link.is-active {
+.page-bar__link.is-active {
   color: var(--color-text);
   text-decoration: underline;
   text-decoration-color: var(--color-accent);
@@ -502,8 +532,23 @@ img {
   text-underline-offset: 0.5em;
 }
 
+/* Between the Outdoor locations and Studio */
+.page-bar__sep {
+  flex: none;
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-line);
+}
+
+/* Inset, so the scrolling list doesn't clip it */
+.page-bar__back:focus-visible,
+.page-bar__link:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: -4px;
+}
+
 /* ==========================================================================
-   Gallery: shoots, chapters & editorial spreads
+   Gallery: location pages & editorial spreads
    ========================================================================== */
 
 .gallery {
@@ -524,30 +569,10 @@ img {
   }
 }
 
-/* Jump targets land just below the sticky nav */
-.shoot,
-.chapter {
-  scroll-margin-top: var(--nav-height, 0px);
-}
-
-/* Short screens (phones held sideways, high zoom): let the bar scroll away so photos get the room */
-@media (max-height: 30rem) {
-  .shoot-nav {
-    position: static;
-  }
-
-  .shoot,
-  .chapter {
-    scroll-margin-top: 0;
-  }
-}
-
-.shoot__title:focus,
 .chapter__title:focus {
   outline: none;
 }
 
-.shoot__title:focus-visible,
 .chapter__title:focus-visible {
   outline: 2px solid var(--color-accent-strong);
   outline-offset: 4px;
@@ -562,20 +587,17 @@ img {
   color: var(--color-muted);
 }
 
-.shoot + .shoot {
-  margin-top: calc(var(--space-xl) * 2);
-}
-
-.shoot__header {
+/* A location page's heading block */
+.chapter__header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   padding: var(--space-lg) var(--space-md) var(--space-md);
   text-align: center;
 }
 
-.shoot__title {
+.chapter__title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
@@ -583,30 +605,90 @@ img {
   line-height: 1.1;
 }
 
-.shoot__divider {
+.chapter__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.chapter__divider {
   display: block;
   width: 3.5rem;
   height: 1px;
+  margin-top: var(--space-xs);
   background: var(--color-accent);
 }
 
-.chapter {
-  margin-top: var(--space-xl);
+/* End of a location: back to the contents, or on to the next location */
+.chapter__end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
+  text-align: center;
 }
 
-.shoot__header + .chapter {
-  margin-top: var(--space-md);
-}
-
-.chapter__title {
-  margin: 0 0 var(--space-md);
-  font-family: var(--font-ui);
-  font-weight: 400;
+.chapter__end-label {
+  margin: 0;
   font-size: var(--text-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  text-align: center;
   color: var(--color-muted);
+}
+
+.chapter__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: var(--space-xs);
+  padding: 0 var(--space-md);
+  border: 1px solid currentColor;
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.chapter__next {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 44px;
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.chapter__next-label {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.chapter__next-title {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+
+.chapter__home:focus-visible,
+.chapter__next:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chapter__home:hover {
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
 }
 
 .spread {
@@ -1098,7 +1180,7 @@ html.viewer-open {
 
 @media (prefers-reduced-motion: reduce) {
   body,
-  .shoot-nav {
+  .page-bar {
     transition: none;
   }
 }
