@@ -13,8 +13,24 @@ export function routeFor(shootId, chapterId, solo) {
 
 export function parseHash(hash) {
   if (hash === "" || hash === "#") return { kind: "contents" };
-  if (hash.startsWith("#/")) return { kind: "location", path: decodeURIComponent(hash.slice(1)) };
-  if (hash.startsWith(PHOTO_PREFIX)) return { kind: "photo", photoKey: decodeURIComponent(hash.slice(PHOTO_PREFIX.length)) };
+  if (hash.startsWith("#/")) {
+    const path = decode(hash.slice(1));
+    return path === null ? { kind: "invalid" } : { kind: "location", path };
+  }
+  if (hash.startsWith(PHOTO_PREFIX)) {
+    const photoKey = decode(hash.slice(PHOTO_PREFIX.length));
+    return photoKey === null ? { kind: "invalid" } : { kind: "photo", photoKey };
+  }
   // Ordinary anchors ("#about" from the cover) belong to the contents page.
   return { kind: "anchor" };
+}
+
+// A mangled address (e.g. a stray "%" from a chat app) can't be decoded; null
+// lets callers treat it as an unknown address rather than throw.
+function decode(text) {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return null;
+  }
 }

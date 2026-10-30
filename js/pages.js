@@ -122,6 +122,7 @@ function buildEndPanel(page) {
 // reported so they can be cleaned out of the address bar.
 function resolve(hash) {
   const route = parseHash(hash);
+  if (route.kind === "invalid") return { page: null, valid: false };
   if (route.kind === "location") {
     const page = byPath.get(route.path);
     return page ? { page, valid: true } : { page: null, valid: false };
