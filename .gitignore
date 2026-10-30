@@ -2,3 +2,5 @@
 CLAUDE.md
 spdd/
 plan.md
+tools/.cache/
+__pycache__/
