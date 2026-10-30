@@ -101,8 +101,12 @@ function onClick(event) {
   const link = event.target.closest("a[data-target]");
   if (!link) return;
   event.preventDefault();
+  jumpTo(document.getElementById(link.dataset.target));
+}
 
-  const target = document.getElementById(link.dataset.target);
+// Scrolls a shoot or location to the top (below the bar) and moves focus to its
+// heading, without touching the URL or history. Also used by the location menu.
+export function jumpTo(target) {
   if (!target) return;
   target.scrollIntoView({ block: "start" });
 
