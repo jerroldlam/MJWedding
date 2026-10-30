@@ -59,6 +59,7 @@ body[data-theme="light"] {
   --color-text: var(--charcoal);
   --color-muted: var(--stone);
   --color-cover-placeholder: var(--linen);
+  --color-line: rgba(46, 43, 39, 0.12);
 }
 
 body[data-theme="dark"] {
@@ -66,6 +67,7 @@ body[data-theme="dark"] {
   --color-text: var(--parchment);
   --color-muted: var(--ash);
   --color-cover-placeholder: #262320;
+  --color-line: rgba(237, 231, 221, 0.14);
 }
 
 /* ==========================================================================
@@ -87,7 +89,9 @@ body {
   font-family: var(--font-ui);
   font-size: var(--text-body);
   line-height: 1.6;
+  /* clip (unlike hidden) never creates a scroll container, which would break the sticky nav */
   overflow-x: hidden;
+  overflow-x: clip;
   transition: background-color var(--dur-theme) var(--ease-soft), color var(--dur-theme) var(--ease-soft);
 }
 
@@ -258,21 +262,77 @@ img {
 .photos {
   min-height: 100vh;
   min-height: 100svh;
-  /* Near edge-to-edge on phones so full-width photos feel immersive */
-  padding:
-    var(--space-xl)
-    max(var(--gutter), env(safe-area-inset-right))
-    var(--space-xl)
-    max(var(--gutter), env(safe-area-inset-left));
+  /* Side padding lives on .gallery so the sticky nav can span the full width */
+  padding: 0 0 var(--space-xl);
   /* Programmatic focus target for the "View photos" link; no visible outline */
   outline: none;
 }
 
-@media (min-width: 40rem) {
-  .photos {
-    padding-right: max(var(--space-md), env(safe-area-inset-right));
-    padding-left: max(var(--space-md), env(safe-area-inset-left));
-  }
+/* ==========================================================================
+   Shoot & location navigation
+   ========================================================================== */
+
+.shoot-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: env(safe-area-inset-top);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+  transition: background-color var(--dur-theme) var(--ease-soft), border-color var(--dur-theme) var(--ease-soft);
+}
+
+.shoot-nav[hidden],
+.shoot-nav__chapters[hidden] {
+  display: none;
+}
+
+.shoot-nav__shoots,
+.shoot-nav__chapters {
+  display: flex;
+  justify-content: safe center;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0 var(--space-sm);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.shoot-nav__shoots::-webkit-scrollbar,
+.shoot-nav__chapters::-webkit-scrollbar {
+  display: none;
+}
+
+/* Keeps the bar the same height for shoots without locations (Studio) */
+.shoot-nav__locations {
+  min-height: 44px;
+}
+
+.shoot-nav__link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.shoot-nav__link--shoot {
+  font-size: 0.875rem;
+}
+
+.shoot-nav__link.is-active {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.5em;
 }
 
 /* ==========================================================================
@@ -282,6 +342,36 @@ img {
 .gallery {
   max-width: var(--gallery-max);
   margin-inline: auto;
+  /* Near edge-to-edge on phones so full-width photos feel immersive */
+  padding:
+    var(--space-lg)
+    max(var(--gutter), env(safe-area-inset-right))
+    0
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+@media (min-width: 40rem) {
+  .gallery {
+    padding-right: max(var(--space-md), env(safe-area-inset-right));
+    padding-left: max(var(--space-md), env(safe-area-inset-left));
+  }
+}
+
+/* Jump targets land just below the sticky nav */
+.shoot,
+.chapter {
+  scroll-margin-top: var(--nav-height, 0px);
+}
+
+.shoot__title:focus,
+.chapter__title:focus {
+  outline: none;
+}
+
+.shoot__title:focus-visible,
+.chapter__title:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 4px;
 }
 
 .gallery__empty {
@@ -435,7 +525,8 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body {
+  body,
+  .shoot-nav {
     transition: none;
   }
 }
