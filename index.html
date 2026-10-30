@@ -55,11 +55,14 @@
 
   <main id="photos" class="photos" tabindex="-1" aria-label="Photos">
     <nav id="locations" class="locations" aria-labelledby="locations-title" hidden>
-      <h2 id="locations-title" class="locations__title">Choose a location</h2>
+      <h2 id="locations-title" class="locations__title" tabindex="-1">Choose a location</h2>
       <span class="locations__divider" aria-hidden="true"></span>
       <ul class="locations__list"></ul>
     </nav>
-    <nav id="shoot-nav" class="shoot-nav" aria-label="Shoots" hidden></nav>
+    <nav id="page-bar" class="page-bar" aria-label="Locations" hidden>
+      <a class="page-bar__back" href="./" data-page-link="contents" aria-label="Back to contents"><span aria-hidden="true">‹</span> Contents</a>
+      <ul class="page-bar__locations"></ul>
+    </nav>
     <section id="gallery" class="gallery" aria-label="Gallery"></section>
   </main>
 
