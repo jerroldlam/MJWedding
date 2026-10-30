@@ -31,6 +31,10 @@
   --space-lg: 2.5rem;
   --space-xl: 4rem;
 
+  /* Gallery */
+  --gutter: 0.25rem;
+  --gallery-max: 87.5rem;
+
   /* Accent: decorative only on the light theme; use the strong variant for text */
   --color-accent: var(--champagne);
   --color-accent-strong: var(--champagne-strong);
@@ -38,6 +42,12 @@
   /* Motion */
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
   --dur-theme: 350ms;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --gutter: 0.5rem;
+  }
 }
 
 /* ==========================================================================
@@ -248,13 +258,145 @@ img {
 .photos {
   min-height: 100vh;
   min-height: 100svh;
+  /* Near edge-to-edge on phones so full-width photos feel immersive */
   padding:
     var(--space-xl)
-    max(var(--space-md), env(safe-area-inset-right))
+    max(var(--gutter), env(safe-area-inset-right))
     var(--space-xl)
-    max(var(--space-md), env(safe-area-inset-left));
+    max(var(--gutter), env(safe-area-inset-left));
   /* Programmatic focus target for the "View photos" link; no visible outline */
   outline: none;
+}
+
+@media (min-width: 40rem) {
+  .photos {
+    padding-right: max(var(--space-md), env(safe-area-inset-right));
+    padding-left: max(var(--space-md), env(safe-area-inset-left));
+  }
+}
+
+/* ==========================================================================
+   Gallery: shoots, chapters & editorial spreads
+   ========================================================================== */
+
+.gallery {
+  max-width: var(--gallery-max);
+  margin-inline: auto;
+}
+
+.gallery__empty {
+  margin: 0;
+  padding-block: var(--space-xl);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--color-muted);
+}
+
+.shoot + .shoot {
+  margin-top: calc(var(--space-xl) * 2);
+}
+
+.shoot__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  text-align: center;
+}
+
+.shoot__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.shoot__divider {
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.chapter {
+  margin-top: var(--space-xl);
+}
+
+.shoot__header + .chapter {
+  margin-top: var(--space-md);
+}
+
+.chapter__title {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.spread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+}
+
+.spread__row {
+  display: flex;
+  gap: var(--gutter);
+  justify-content: center;
+}
+
+/* Cap a row's height at ~90% of the screen; capped rows are narrower and centred */
+.spread__row--group {
+  width: 100%;
+  margin-inline: auto;
+  max-width: calc(90vh * var(--row-ar) + var(--gutter) * var(--row-gaps));
+  max-width: calc(90svh * var(--row-ar) + var(--gutter) * var(--row-gaps));
+}
+
+/* flex-grow and aspect-ratio both equal the photo's aspect, so every tile in a
+   row shares one height and the row fills the width exactly */
+.tile {
+  position: relative;
+  margin: 0;
+  flex: var(--ar) 1 0%;
+  min-width: 0;
+  aspect-ratio: var(--ar);
+  background-color: var(--tile-color);
+  overflow: hidden;
+}
+
+.spread__row--full .tile {
+  max-width: calc(90vh * var(--ar));
+  max-width: calc(90svh * var(--ar));
+}
+
+.spread__row--single .tile {
+  flex: 0 1 auto;
+  width: min(100%, calc(80vh * var(--ar)));
+  width: min(100%, calc(80svh * var(--ar)));
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.tile img.is-loaded {
+  opacity: 1;
+}
+
+.tile img.is-broken {
+  visibility: hidden;
 }
 
 .site-footer {
@@ -280,6 +422,10 @@ img {
 
   .cover__cue-arrow {
     animation: cue-bob 2.4s var(--ease-soft) infinite;
+  }
+
+  .tile img {
+    transition: opacity 400ms var(--ease-soft);
   }
 }
 

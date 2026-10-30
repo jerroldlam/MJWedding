@@ -1,21 +1,26 @@
 /*
  * Photobook entry point.
  *
- * Later stories add a feature module (e.g. gallery.js, nav.js, lightbox.js),
- * import its init function here, and append it to `features` in the order it
- * should start. The page is fully usable without JavaScript; features only
- * enhance it.
+ * Each feature module exports an init function (sync or async). Import it
+ * here and append it to `features` in the order it should start. Failures,
+ * including rejected promises, are isolated so one broken feature never
+ * blanks the page. The page is usable without JavaScript; features enhance it.
  */
 
-const features = [];
+import { init as initGallery } from "./gallery.js";
+
+const features = [{ name: "gallery", init: initGallery }];
 
 function start() {
   for (const { name, init } of features) {
+    const fail = (error) => console.error(`[photobook] ${name} failed to start`, error);
     try {
-      init();
+      const result = init();
+      if (result && typeof result.then === "function") {
+        result.catch(fail);
+      }
     } catch (error) {
-      // Isolate failures so one broken feature never blanks the page.
-      console.error(`[photobook] ${name} failed to start`, error);
+      fail(error);
     }
   }
 }
