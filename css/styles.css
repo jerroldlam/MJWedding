@@ -997,8 +997,10 @@ html.viewer-open {
     max(0.5rem, env(safe-area-inset-right))
     max(3.5rem, env(safe-area-inset-bottom))
     max(0.5rem, env(safe-area-inset-left));
-  /* Swipes are handled in JS; the page behind must not scroll */
+  /* Swipes and zoom are handled in JS; the page behind must not scroll */
   touch-action: none;
+  /* A zoomed photo is clipped to the screen and never scrolls */
+  overflow: hidden;
 }
 
 /* The background holds the tile's already-loaded image until the larger one arrives */
@@ -1170,6 +1172,12 @@ html.viewer-open {
 
   .viewer__img {
     transition: opacity 300ms var(--ease-soft);
+  }
+
+  /* Double-tap, double-click and settling back animate; pinch and drag follow
+     the fingers (viewer.js) */
+  .viewer__frame.is-settling {
+    transition: transform 250ms var(--ease-soft);
   }
 }
 
