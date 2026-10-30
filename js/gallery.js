@@ -1,7 +1,7 @@
 /*
  * Gallery feature: loads data/photos.json, renders each shoot and location as
- * editorial spreads, recomposes rows when crossing the phone/wide breakpoint,
- * and announces "photobook:gallery-ready" for later features (nav, viewer).
+ * editorial spreads, reveals rows as they first scroll into view, recomposes
+ * rows when crossing the phone/wide breakpoint, and announces "photobook:gallery-ready" for later features (nav, viewer).
  */
 
 import { classifyShape, composeRows } from "./spreads.js";
@@ -11,6 +11,7 @@ const WIDE_QUERY = "(min-width: 40rem)";
 const GALLERY_MAX_PX = 1400;
 const READY_EVENT = "photobook:gallery-ready";
 const SIZES = ["sm", "md", "lg"];
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
 export async function init() {
   const gallery = document.getElementById("gallery");
@@ -24,8 +25,10 @@ export async function init() {
 
   const chapters = renderManifest(gallery, manifest);
   const media = window.matchMedia(WIDE_QUERY);
-  layoutAll(chapters, media.matches);
+  layoutAll(chapters, media.matches, createRevealer());
   observeTiles(chapters.flatMap((chapter) => chapter.tiles));
+  // iOS Safari only applies :active (the press dip) when a touch listener exists.
+  gallery.addEventListener("touchstart", () => {}, { passive: true });
   const anchor = trackAnchor(gallery);
   media.addEventListener("change", (event) => relayout(chapters, event.matches, anchor));
 
@@ -190,7 +193,27 @@ function observeTiles(tiles) {
   tiles.forEach((tile) => observer.observe(tile.figure));
 }
 
-function layoutChapter({ spread, tiles }, wide) {
+// Rows rise into place the first time they scroll into view. Returns null (no
+// reveal) when the guest prefers reduced motion or the browser can't observe.
+function createRevealer() {
+  if (!("IntersectionObserver" in window) || window.matchMedia(REDUCED_MOTION).matches) return null;
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.remove("is-pending");
+        observer.unobserve(entry.target);
+      }
+    },
+    { rootMargin: "0px 0px -8% 0px" },
+  );
+  return (row) => {
+    row.classList.add("is-pending");
+    observer.observe(row);
+  };
+}
+
+function layoutChapter({ spread, tiles }, wide, reveal) {
   const rowEls = composeRows(tiles.map((tile) => tile.shape), wide).map(({ kind, indices }) => {
     const row = el("div", { className: `spread__row spread__row--${kind}` });
     const members = indices.map((index) => tiles[index]);
@@ -206,6 +229,7 @@ function layoutChapter({ spread, tiles }, wide) {
       row.style.setProperty("--row-ar", String(totalAspect));
       row.style.setProperty("--row-gaps", String(members.length - 1));
     }
+    reveal?.(row);
     return row;
   });
 
@@ -213,8 +237,9 @@ function layoutChapter({ spread, tiles }, wide) {
   spread.replaceChildren(...rowEls);
 }
 
-function layoutAll(chapters, wide) {
-  chapters.forEach((chapter) => layoutChapter(chapter, wide));
+// Only the first layout reveals; rows rebuilt on a breakpoint change show at once.
+function layoutAll(chapters, wide, reveal = null) {
+  chapters.forEach((chapter) => layoutChapter(chapter, wide, reveal));
 }
 
 function rafThrottle(fn) {

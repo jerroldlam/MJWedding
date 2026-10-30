@@ -4,6 +4,8 @@
  * closes via ✕, Esc, swipe down, a click outside the photo or the back button.
  * Each photo has a shareable address (#photo/<shoot>/<chapter>/<photo>).
  * History: one entry is pushed on open; moves replace it; close goes back.
+ * Opening from a tile grows the photo out of it; closing shrinks it back into
+ * the tile of the photo last viewed (skipped when reduced motion is preferred).
  */
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -11,6 +13,9 @@ const HASH_PREFIX = "#photo/";
 const SIZES = ["sm", "md", "lg"];
 const SWIPE_MIN = 50;
 const SWIPE_CLOSE = 80;
+const FLY_MS = 380;
+const FLY_EASE = "cubic-bezier(0.2, 0.7, 0.2, 1)";
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
 let sequence = [];
 let byKey = new Map();
@@ -20,6 +25,9 @@ let isOpen = false;
 let pushed = false;
 let savedThemeColor = null;
 let dom = null;
+// Ends a running shrink-back at once (e.g. reopened before it finished).
+let finishClosing = null;
+let growing = [];
 
 export function init() {
   document.addEventListener(READY_EVENT, (event) => setup(event.detail.manifest), { once: true });
@@ -32,11 +40,11 @@ function setup(manifest) {
   document.body.append(dom.dialog);
 
   document.getElementById("gallery")?.addEventListener("click", (event) => {
-    const link = event.target.closest("a.tile__link");
-    const key = link?.closest(".tile")?.dataset.photo;
+    const tile = event.target.closest("a.tile__link")?.closest(".tile");
+    const key = tile?.dataset.photo;
     if (!byKey.has(key)) return;
     event.preventDefault();
-    open(byKey.get(key), true);
+    open(byKey.get(key), true, tile);
   });
   window.addEventListener("popstate", onPopState);
   window.addEventListener("resize", () => {
@@ -122,7 +130,8 @@ function themeMeta() {
   return document.querySelector('meta[name="theme-color"]');
 }
 
-function open(index, push) {
+function open(index, push, fromTile = null) {
+  finishClosing?.();
   if (!isOpen) {
     const meta = themeMeta();
     if (meta) {
@@ -141,8 +150,41 @@ function open(index, push) {
     } else {
       pushed = Boolean(history.state?.viewer);
     }
+    show(index);
+    if (fromTile && wantsMotion()) growing = fly(fromTile, true);
+    return;
   }
   show(index);
+}
+
+function wantsMotion() {
+  return !window.matchMedia(REDUCED_MOTION).matches && typeof dom.frame.animate === "function";
+}
+
+// Moves the photo between its tile and its full-screen place while the dark
+// background and the controls fade, so it's clear the photo opens from the page.
+function fly(tile, opening) {
+  const from = tile.getBoundingClientRect();
+  const to = dom.frame.getBoundingClientRect();
+  if (!from.width || !to.width) return [];
+
+  const atTile = {
+    transformOrigin: "0 0",
+    transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})`,
+  };
+  const atFull = { transformOrigin: "0 0", transform: "none" };
+  const backdrop = getComputedStyle(dom.dialog).backgroundColor;
+  const order = (tileState, fullState) => (opening ? [tileState, fullState] : [fullState, tileState]);
+  // A closing animation holds its end state until the dialog is closed.
+  const timing = { duration: FLY_MS, easing: FLY_EASE, fill: opening ? "none" : "forwards" };
+
+  return [
+    dom.frame.animate(order(atTile, atFull), timing),
+    dom.dialog.animate(order({ backgroundColor: "transparent" }, { backgroundColor: backdrop }), timing),
+    ...[dom.close, dom.prev, dom.next, dom.position].map((node) =>
+      node.animate(order({ opacity: 0 }, { opacity: getComputedStyle(node).opacity }), timing),
+    ),
+  ];
 }
 
 function srcsetFor(photo) {
@@ -154,9 +196,13 @@ function show(index) {
   const entry = sequence[index];
   const { photo } = entry;
 
+  const tileImg = tileImage(entry.key);
   dom.img.classList.remove("is-loaded", "is-broken");
-  dom.img.alt = tileAlt(entry.key) || photo.alt || "";
+  // The gallery builds the positional description; reuse it so both match.
+  dom.img.alt = tileImg?.alt || photo.alt || "";
   dom.frame.style.backgroundColor = photo.color || "transparent";
+  // The tile's already-downloaded image stands in while the larger one loads.
+  dom.frame.style.backgroundImage = tileImg?.currentSrc ? `url("${tileImg.currentSrc}")` : "none";
   fitCurrent();
   dom.img.srcset = srcsetFor(photo);
   dom.img.src = photo.src.md.url;
@@ -169,9 +215,12 @@ function show(index) {
   if (dom.img.complete && dom.img.naturalWidth > 0) onImageLoad();
 }
 
-// The gallery builds the positional description; reuse it so both match.
-function tileAlt(key) {
-  return document.querySelector(`.tile[data-photo="${CSS.escape(key)}"] img`)?.alt;
+function tileFor(key) {
+  return document.querySelector(`.tile[data-photo="${CSS.escape(key)}"]`);
+}
+
+function tileImage(key) {
+  return tileFor(key)?.querySelector("img");
 }
 
 function availableBox() {
@@ -213,6 +262,7 @@ function preloadNeighbours(index) {
 }
 
 function move(delta) {
+  if (!isOpen) return; // the photo is shrinking back into the page
   const index = current + delta;
   if (index >= 0 && index < sequence.length) show(index);
 }
@@ -283,22 +333,48 @@ function onPopState() {
 function closeUI() {
   isOpen = false;
   pushed = false;
-  dom.dialog.close();
+  // Closed mid-grow: measure from the photo's resting place, not mid-flight.
+  growing.forEach((animation) => animation.cancel());
+  growing = [];
   document.documentElement.classList.remove("viewer-open");
   const meta = themeMeta();
   if (meta && savedThemeColor) meta.content = savedThemeColor;
 
   // Return to the photo the guest was last viewing.
-  const tile = document.querySelector(`.tile[data-photo="${CSS.escape(sequence[current].key)}"]`);
+  const tile = tileFor(sequence[current].key);
   if (tile) {
+    showRowNow(tile);
     const navBottom = document.getElementById("shoot-nav")?.getBoundingClientRect().bottom || 0;
     const rect = tile.getBoundingClientRect();
     if (rect.top < navBottom || rect.bottom > window.innerHeight) {
       tile.scrollIntoView({ block: "center", behavior: "instant" });
     }
-    tile.querySelector(".tile__link")?.focus({ preventScroll: true });
   }
-  requestAnimationFrame(() => {
-    history.scrollRestoration = "auto";
-  });
+
+  const animations = tile && wantsMotion() ? fly(tile, false) : [];
+  let finished = false;
+  finishClosing = () => {
+    if (finished) return;
+    finished = true;
+    finishClosing = null;
+    dom.dialog.close();
+    animations.forEach((animation) => animation.cancel());
+    tile?.querySelector(".tile__link")?.focus({ preventScroll: true });
+    requestAnimationFrame(() => {
+      history.scrollRestoration = "auto";
+    });
+  };
+  if (animations.length) animations[0].finished.then(finishClosing, () => {});
+  else finishClosing();
+}
+
+// A row still waiting for its scroll-in reveal (gallery.js) is invisible; show
+// it at once so the photo has somewhere visible to land.
+function showRowNow(tile) {
+  const row = tile.closest(".spread__row.is-pending");
+  if (!row) return;
+  row.style.transition = "none";
+  row.classList.remove("is-pending");
+  row.getBoundingClientRect();
+  row.style.transition = "";
 }

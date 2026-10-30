@@ -512,8 +512,9 @@ img {
   pointer-events: none;
 }
 
-/* Mouse and trackpad only (phones have no hover): pointing at a photo dims the
-   rest of its chapter and slowly zooms the photo, hinting that it opens */
+/* Pressing a photo (finger or mouse) dips it slightly. With a mouse or
+   trackpad, pointing at a photo also dims the rest of its chapter and slowly
+   zooms the photo. Together they hint that photos open. */
 @media (hover: hover) and (pointer: fine) {
   /* Undimming waits a moment, so crossing the gap between two photos doesn't flash */
   .tile {
@@ -530,10 +531,23 @@ img {
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .tile {
+    transition: transform 160ms var(--ease-soft), filter 160ms var(--ease-soft);
+  }
+
+  .tile:active {
+    transform: scale(0.97);
+    filter: brightness(0.88);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .tile {
-    transition-duration: 400ms;
-    transition-timing-function: var(--ease-soft);
+    transition:
+      opacity 400ms var(--ease-soft) 150ms,
+      transform 160ms var(--ease-soft),
+      filter 160ms var(--ease-soft);
   }
 
   .tile:hover img {
@@ -545,8 +559,11 @@ img {
    Photo viewer (always dark)
    ========================================================================== */
 
+/* Keeping the scrollbar's space stops the page shifting under the photo as it
+   grows out of (and back into) its tile */
 html.viewer-open {
   overflow: hidden;
+  scrollbar-gutter: stable;
 }
 
 .viewer {
@@ -564,8 +581,10 @@ html.viewer-open {
   overscroll-behavior: contain;
 }
 
+/* The dialog itself fills the screen with ink; a clear backdrop lets that fade
+   in while the photo grows out of its tile */
 .viewer::backdrop {
-  background: var(--ink);
+  background: transparent;
 }
 
 .viewer__stage {
@@ -583,9 +602,12 @@ html.viewer-open {
   touch-action: none;
 }
 
+/* The background holds the tile's already-loaded image until the larger one arrives */
 .viewer__frame {
   position: relative;
   margin: 0;
+  background-position: center;
+  background-size: cover;
 }
 
 .viewer__img {
@@ -735,6 +757,16 @@ html.viewer-open {
 
   .tile img {
     transition: opacity 400ms var(--ease-soft), transform 900ms var(--ease-soft);
+  }
+
+  /* Rows rise into place the first time they scroll into view (gallery.js) */
+  .spread__row {
+    transition: opacity 700ms var(--ease-soft), transform 700ms var(--ease-soft);
+  }
+
+  .spread__row.is-pending {
+    opacity: 0;
+    transform: translateY(1.5rem);
   }
 
   .viewer__img {
