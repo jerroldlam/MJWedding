@@ -1,9 +1,12 @@
 /*
- * Gallery feature: loads data/photos.json, renders each shoot and location as
- * editorial spreads, reveals rows as they first scroll into view, recomposes
- * rows when crossing the phone/wide breakpoint, and announces "photobook:gallery-ready" for later features (nav, viewer).
+ * Gallery feature: loads data/photos.json, renders each location as its own
+ * page section (heading, then editorial spreads), reveals rows as they first
+ * scroll into view, recomposes rows when crossing the phone/wide breakpoint,
+ * and announces "photobook:gallery-ready" for later features (locations,
+ * pages, viewer). Which page is visible is up to pages.js.
  */
 
+import { routeFor } from "./routes.js";
 import { classifyShape, composeRows } from "./spreads.js";
 
 const MANIFEST_URL = "data/photos.json";
@@ -83,49 +86,41 @@ function renderEmpty(gallery) {
   gallery.replaceChildren(el("p", { className: "gallery__empty", text: "Photos coming soon" }));
 }
 
+// One page section per location, each with its own heading block (the page's
+// h1 while it's showing; the cover is hidden then).
 function renderManifest(gallery, manifest) {
   const chapters = [];
-  const sections = manifest.shoots.map((shoot) => {
-    const section = el("section", { className: "shoot" });
-    section.id = `shoot-${shoot.id}`;
-    section.dataset.shoot = shoot.id;
-    section.dataset.shootTheme = shoot.theme;
-    section.setAttribute("aria-labelledby", `shoot-${shoot.id}-title`);
-
-    const header = el("header", { className: "shoot__header" });
-    const title = el("h2", { className: "shoot__title", text: shoot.title });
-    title.id = `shoot-${shoot.id}-title`;
-    const divider = el("span", { className: "shoot__divider" });
-    divider.setAttribute("aria-hidden", "true");
-    header.append(title, divider);
-    section.append(header);
-
-    for (const chapter of shoot.chapters) {
-      // A shoot whose only chapter is itself (Studio) shows its heading once.
+  const sections = manifest.shoots.flatMap((shoot) =>
+    shoot.chapters.map((chapter) => {
+      // A shoot whose only chapter is itself (Studio) is a single location.
       const solo = shoot.chapters.length === 1 && chapter.id === shoot.id;
-      const chapterEl = el("section", { className: "chapter" });
-      chapterEl.id = solo ? shoot.id : `${shoot.id}-${chapter.id}`;
-      chapterEl.dataset.chapter = chapter.id;
+      const section = el("section", { className: "chapter" });
+      section.id = solo ? shoot.id : `${shoot.id}-${chapter.id}`;
+      section.dataset.shoot = shoot.id;
+      section.dataset.chapter = chapter.id;
+      section.dataset.route = routeFor(shoot.id, chapter.id, solo);
+      section.setAttribute("aria-labelledby", `${section.id}-title`);
 
-      if (solo) {
-        chapterEl.setAttribute("aria-labelledby", `shoot-${shoot.id}-title`);
-      } else {
-        const heading = el("h3", { className: "chapter__title", text: chapter.title });
-        heading.id = `${chapterEl.id}-title`;
-        chapterEl.setAttribute("aria-labelledby", heading.id);
-        chapterEl.append(heading);
-      }
+      const count = chapter.photos.length;
+      const photos = `${count} ${count === 1 ? "photo" : "photos"}`;
+      const header = el("header", { className: "chapter__header" });
+      const title = el("h1", { className: "chapter__title", text: chapter.title });
+      title.id = `${section.id}-title`;
+      title.tabIndex = -1;
+      const meta = el("p", { className: "chapter__meta", text: solo ? photos : `${shoot.title} · ${photos}` });
+      const divider = el("span", { className: "chapter__divider" });
+      divider.setAttribute("aria-hidden", "true");
+      header.append(title, meta, divider);
 
       const spread = el("div", { className: "spread" });
-      chapterEl.append(spread);
-      section.append(chapterEl);
+      section.append(header, spread);
       chapters.push({
         spread,
-        tiles: chapter.photos.map((photo, index) => createTile(shoot, chapter, photo, index, chapter.photos.length)),
+        tiles: chapter.photos.map((photo, index) => createTile(shoot, chapter, photo, index, count)),
       });
-    }
-    return section;
-  });
+      return section;
+    }),
+  );
 
   gallery.replaceChildren(...sections);
   return chapters;

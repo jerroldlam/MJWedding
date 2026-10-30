@@ -1,12 +1,15 @@
 /*
  * Full-screen photo viewer: opens any tile in a dark modal <dialog>, moves
- * through the whole book in page order (swipe, arrow keys, buttons), and
+ * through the current location's photos (swipe, arrow keys, buttons), and
  * closes via ✕, Esc, swipe down, a click outside the photo or the back button.
  * Each photo has a shareable address (#photo/<shoot>/<chapter>/<photo>).
  * History: one entry is pushed on open; moves replace it; close goes back.
+ * Page history and scroll restoration belong to pages.js.
  * Opening from a tile grows the photo out of it; closing shrinks it back into
  * the tile of the photo last viewed (skipped when reduced motion is preferred).
  */
+
+import { routeFor } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 const HASH_PREFIX = "#photo/";
@@ -51,25 +54,35 @@ function setup(manifest) {
     if (isOpen) fitCurrent();
   });
 
+  // pages.js has already cleaned out dead photo links.
   const key = keyFromHash(location.hash);
-  if (key !== null) {
-    if (byKey.has(key)) open(byKey.get(key), false);
-    else clearHash();
-  }
+  if (key !== null && byKey.has(key)) open(byKey.get(key), false);
 }
 
+// Every photo in book order; start/end bound each one's location, so moving
+// stays within the page it was opened from.
 function buildSequence(manifest) {
-  return manifest.shoots.flatMap((shoot) =>
-    shoot.chapters.flatMap((chapter) =>
-      chapter.photos.map((photo, i) => ({
-        key: `${shoot.id}/${chapter.id}/${photo.id}`,
-        photo,
-        title: chapter.title,
-        index: i + 1,
-        count: chapter.photos.length,
-      })),
-    ),
-  );
+  const entries = [];
+  for (const shoot of manifest.shoots) {
+    for (const chapter of shoot.chapters) {
+      const start = entries.length;
+      const end = start + chapter.photos.length - 1;
+      const route = routeFor(shoot.id, chapter.id, shoot.chapters.length === 1 && chapter.id === shoot.id);
+      chapter.photos.forEach((photo, i) => {
+        entries.push({
+          key: `${shoot.id}/${chapter.id}/${photo.id}`,
+          photo,
+          title: chapter.title,
+          index: i + 1,
+          count: chapter.photos.length,
+          start,
+          end,
+          route,
+        });
+      });
+    }
+  }
+  return entries;
 }
 
 function el(tag, className, attrs = {}) {
@@ -122,8 +135,10 @@ function hashFor(index) {
   return HASH_PREFIX + sequence[index].key;
 }
 
-function clearHash() {
-  history.replaceState(null, "", location.pathname + location.search);
+// A photo opened straight from a link (no entry of ours to go back to) leaves
+// the address on its location page.
+function restoreRoute() {
+  history.replaceState(history.state, "", `#${sequence[current].route}`);
 }
 
 function themeMeta() {
@@ -142,9 +157,6 @@ function open(index, push, fromTile = null) {
     dom.dialog.showModal();
     isOpen = true;
     if (push) {
-      // Otherwise history.back() on close would restore the old scroll position
-      // and undo the return-to-photo scroll.
-      history.scrollRestoration = "manual";
       history.pushState({ viewer: true }, "", hashFor(index));
       pushed = true;
     } else {
@@ -208,8 +220,8 @@ function show(index) {
   dom.img.src = photo.src.md.url;
 
   dom.position.textContent = `${entry.title} · ${entry.index} / ${entry.count}`;
-  dom.prev.disabled = index === 0;
-  dom.next.disabled = index === sequence.length - 1;
+  dom.prev.disabled = index === entry.start;
+  dom.next.disabled = index === entry.end;
 
   if (location.hash !== hashFor(index)) history.replaceState(history.state, "", hashFor(index));
   if (dom.img.complete && dom.img.naturalWidth > 0) onImageLoad();
@@ -253,8 +265,9 @@ function onImageLoad() {
 }
 
 function preloadNeighbours(index) {
+  const { start, end } = sequence[index];
   for (const i of [index + 1, index - 1]) {
-    if (i < 0 || i >= sequence.length) continue;
+    if (i < start || i > end) continue;
     const pre = new Image();
     pre.sizes = `${fitSize(sequence[i].photo).width}px`;
     pre.srcset = srcsetFor(sequence[i].photo);
@@ -263,8 +276,9 @@ function preloadNeighbours(index) {
 
 function move(delta) {
   if (!isOpen) return; // the photo is shrinking back into the page
+  const { start, end } = sequence[current];
   const index = current + delta;
-  if (index >= 0 && index < sequence.length) show(index);
+  if (index >= start && index <= end) show(index);
 }
 
 function onKeydown(event) {
@@ -314,7 +328,7 @@ function requestClose() {
   if (pushed) {
     history.back(); // closeUI runs in the popstate handler
   } else {
-    clearHash();
+    restoreRoute();
     closeUI();
   }
 }
@@ -326,8 +340,8 @@ function onPopState() {
     else open(byKey.get(key), false);
     return;
   }
+  // pages.js has already sent dead photo links to the contents.
   if (isOpen) closeUI();
-  if (key !== null) clearHash(); // a dead photo link typed while the page is open
 }
 
 function closeUI() {
@@ -344,7 +358,7 @@ function closeUI() {
   const tile = tileFor(sequence[current].key);
   if (tile) {
     showRowNow(tile);
-    const navBottom = document.getElementById("shoot-nav")?.getBoundingClientRect().bottom || 0;
+    const navBottom = document.getElementById("page-bar")?.getBoundingClientRect().bottom || 0;
     const rect = tile.getBoundingClientRect();
     if (rect.top < navBottom || rect.bottom > window.innerHeight) {
       tile.scrollIntoView({ block: "center", behavior: "instant" });
@@ -360,9 +374,6 @@ function closeUI() {
     dom.dialog.close();
     animations.forEach((animation) => animation.cancel());
     tile?.querySelector(".tile__link")?.focus({ preventScroll: true });
-    requestAnimationFrame(() => {
-      history.scrollRestoration = "auto";
-    });
   };
   if (animations.length) animations[0].finished.then(finishClosing, () => {});
   else finishClosing();
