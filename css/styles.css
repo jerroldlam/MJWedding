@@ -87,10 +87,10 @@
 }
 
 /* ==========================================================================
-   Themes (switched by data-theme on <body>: light or dark text and lines)
+   Themes (switched by data-theme: light or dark text and lines, on <body> and on each location card)
    ========================================================================== */
 
-body[data-theme="light"] {
+[data-theme="light"] {
   --color-bg: var(--ivory);
   --color-text: var(--charcoal);
   --color-muted: var(--stone);
@@ -98,7 +98,7 @@ body[data-theme="light"] {
   --color-line: rgba(46, 43, 39, 0.12);
 }
 
-body[data-theme="dark"] {
+[data-theme="dark"] {
   --color-bg: var(--ink);
   --color-text: var(--parchment);
   --color-muted: var(--ash);
@@ -106,30 +106,31 @@ body[data-theme="dark"] {
   --color-line: rgba(237, 231, 221, 0.14);
 }
 
-/* Each location page has its own background (data-location is set by
-   pages.js from the location's section id; the contents keeps the plain theme).
-   --location-theme tells pages.js which text colours (data-theme) go with it. */
-body[data-location="outdoor-beach"] {
+/* Each location's own background. data-location (a location's section id) is
+   set on <body> by pages.js for the page showing, and on each location card
+   by locations.js, so a card always matches its page; the contents keeps the
+   plain theme. --location-theme says which text colours (data-theme) go with it. */
+[data-location="outdoor-beach"] {
   --color-bg: var(--shell);
   --location-theme: light;
 }
 
-body[data-location="outdoor-flower-field"] {
+[data-location="outdoor-flower-field"] {
   --color-bg: var(--mist);
   --location-theme: light;
 }
 
-body[data-location="outdoor-forest"] {
+[data-location="outdoor-forest"] {
   --color-bg: var(--slate);
   --location-theme: dark;
 }
 
-body[data-location="outdoor-open-field"] {
+[data-location="outdoor-open-field"] {
   --color-bg: var(--oat);
   --location-theme: light;
 }
 
-body[data-location="studio"] {
+[data-location="studio"] {
   --color-bg: var(--espresso);
   --location-theme: dark;
 }
@@ -999,8 +1000,21 @@ body[data-page="contents"] .page-bar {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-  color: inherit;
+  height: 100%;
+  /* The mat: the location page's own background and text colours (from the
+     card's data-location and data-theme, set by locations.js) */
+  padding:
+    clamp(0.5rem, 1.2vw, 0.875rem)
+    clamp(0.5rem, 1.2vw, 0.875rem)
+    clamp(0.75rem, 1.6vw, 1.125rem);
+  background: var(--color-bg);
+  color: var(--color-text);
   text-decoration: none;
+}
+
+/* A hairline keeps the pale mats distinct from the ivory page */
+.locations__card[data-theme="light"] {
+  box-shadow: inset 0 0 0 1px var(--color-line);
 }
 
 .locations__card:focus-visible {
@@ -1010,7 +1024,7 @@ body[data-page="contents"] .page-bar {
 
 .locations__photo {
   display: block;
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
   aspect-ratio: 3 / 4;
   overflow: hidden;
 }
