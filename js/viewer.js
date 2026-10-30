@@ -155,7 +155,7 @@ function show(index) {
   const { photo } = entry;
 
   dom.img.classList.remove("is-loaded", "is-broken");
-  dom.img.alt = photo.alt || "";
+  dom.img.alt = tileAlt(entry.key) || photo.alt || "";
   dom.frame.style.backgroundColor = photo.color || "transparent";
   fitCurrent();
   dom.img.srcset = srcsetFor(photo);
@@ -167,6 +167,11 @@ function show(index) {
 
   if (location.hash !== hashFor(index)) history.replaceState(history.state, "", hashFor(index));
   if (dom.img.complete && dom.img.naturalWidth > 0) onImageLoad();
+}
+
+// The gallery builds the positional description; reuse it so both match.
+function tileAlt(key) {
+  return document.querySelector(`.tile[data-photo="${CSS.escape(key)}"] img`)?.alt;
 }
 
 function availableBox() {
@@ -269,9 +274,10 @@ function onPopState() {
   if (key !== null && byKey.has(key)) {
     if (isOpen) show(byKey.get(key));
     else open(byKey.get(key), false);
-  } else if (isOpen) {
-    closeUI();
+    return;
   }
+  if (isOpen) closeUI();
+  if (key !== null) clearHash(); // a dead photo link typed while the page is open
 }
 
 function closeUI() {

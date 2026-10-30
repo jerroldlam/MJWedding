@@ -115,7 +115,9 @@ function startSpy(nav, shoots) {
 
   const update = () => {
     queued = false;
-    const threshold = nav.getBoundingClientRect().bottom + window.innerHeight * SPY_OFFSET;
+    // Clamped so spying still works when the bar isn't pinned (short screens) and has scrolled away.
+    const navBottom = Math.max(0, nav.getBoundingClientRect().bottom);
+    const threshold = navBottom + window.innerHeight * SPY_OFFSET;
     let active = targets[0];
     for (const target of targets) {
       if (target.chapter.spyTarget.getBoundingClientRect().top <= threshold) active = target;
