@@ -116,7 +116,10 @@ function renderManifest(gallery, manifest) {
       const spread = el("div", { className: "spread" });
       chapterEl.append(spread);
       section.append(chapterEl);
-      chapters.push({ spread, tiles: chapter.photos.map((photo) => createTile(shoot, chapter, photo)) });
+      chapters.push({
+        spread,
+        tiles: chapter.photos.map((photo, index) => createTile(shoot, chapter, photo, index, chapter.photos.length)),
+      });
     }
     return section;
   });
@@ -125,7 +128,7 @@ function renderManifest(gallery, manifest) {
   return chapters;
 }
 
-function createTile(shoot, chapter, photo) {
+function createTile(shoot, chapter, photo, index, count) {
   const figure = el("figure", { className: "tile" });
   figure.dataset.photo = `${shoot.id}/${chapter.id}/${photo.id}`;
   figure.style.setProperty("--ar", String(photo.width / photo.height));
@@ -134,7 +137,8 @@ function createTile(shoot, chapter, photo) {
   const img = new Image();
   img.addEventListener("load", () => img.classList.add("is-loaded"));
   img.addEventListener("error", () => img.classList.add("is-broken"));
-  img.alt = photo.alt || "";
+  // Position makes each description distinct for screen readers; the viewer reuses it.
+  img.alt = photo.alt ? `${photo.alt}, photo ${index + 1} of ${count}` : `Photo ${index + 1} of ${count}`;
   img.width = photo.width;
   img.height = photo.height;
   img.loading = "lazy";
