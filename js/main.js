@@ -8,8 +8,12 @@
  */
 
 import { init as initGallery } from "./gallery.js";
+import { init as initNav } from "./nav.js";
 
-const features = [{ name: "gallery", init: initGallery }];
+const features = [
+  { name: "gallery", init: initGallery },
+  { name: "nav", init: initNav },
+];
 
 function start() {
   for (const { name, init } of features) {
