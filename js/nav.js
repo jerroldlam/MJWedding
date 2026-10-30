@@ -1,14 +1,15 @@
 /*
  * Shoot & location navigation: a pinned two-row bar (shoots, then the active
  * shoot's locations) built once the gallery is ready. Highlights the section
- * under the bar while scrolling and switches the page theme with the shoot.
+ * under the bar while scrolling and tints the page for the location on screen
+ * (colours and light/dark live in the stylesheet; the cover keeps the shoot's).
  * Never changes the URL or history (the back button belongs to the viewer).
  */
 
 const READY_EVENT = "photobook:gallery-ready";
 // The active section is the last one whose top is above this fraction of the viewport below the bar.
 const SPY_OFFSET = 0.25;
-const THEME_COLOR_TOKENS = { light: "--ivory", dark: "--ink" };
+const THEMES = ["light", "dark"];
 
 export function init() {
   document.addEventListener(READY_EVENT, (event) => buildNav(event.detail.manifest), { once: true });
@@ -66,7 +67,13 @@ function buildNav(manifest) {
           chapterList.append(chapterItem);
         }
         // A shoot's first chapter starts at the shoot heading, so the heading counts.
-        return { id: chapter.id, section: chapterEl, spyTarget: index === 0 ? section : chapterEl, link: chapterLink };
+        return {
+          id: chapter.id,
+          location: chapterEl.id,
+          section: chapterEl,
+          spyTarget: index === 0 ? section : chapterEl,
+          link: chapterLink,
+        };
       })
       .filter(Boolean);
 
@@ -111,20 +118,33 @@ function onClick(event) {
 function startSpy(nav, shoots) {
   const targets = shoots.flatMap((shoot) => shoot.chapters.map((chapter) => ({ shoot, chapter })));
   let current = null;
+  // undefined until the first update, so the starting tint is always applied.
+  let currentLocation;
   let queued = false;
 
   const update = () => {
     queued = false;
-    // Clamped so spying still works when the bar isn't pinned (short screens) and has scrolled away.
-    const navBottom = Math.max(0, nav.getBoundingClientRect().bottom);
+    // Where the bar's bottom is (or will be, while it's still below the cover), clamped
+    // to 0 so spying still works when it isn't pinned (short screens) and has scrolled away.
+    const navBottom = Math.min(Math.max(0, nav.getBoundingClientRect().bottom), nav.offsetHeight);
     const threshold = navBottom + window.innerHeight * SPY_OFFSET;
     let active = targets[0];
+    // Still on the cover: the first link stays highlighted but the page isn't tinted yet.
+    let reached = false;
     for (const target of targets) {
-      if (target.chapter.spyTarget.getBoundingClientRect().top <= threshold) active = target;
+      if (target.chapter.spyTarget.getBoundingClientRect().top <= threshold) {
+        active = target;
+        reached = true;
+      }
     }
     if (active !== current) {
       current = active;
       setActive(shoots, active);
+    }
+    const location = reached ? active.chapter.location : null;
+    if (location !== currentLocation) {
+      currentLocation = location;
+      applyTheme(active.shoot.theme, location);
     }
   };
   const schedule = () => {
@@ -153,7 +173,6 @@ function setActive(shoots, { shoot, chapter }) {
     }
   }
   if (chapter.link) centreInRow(chapter.link);
-  applyTheme(shoot.theme);
 }
 
 function prefersReducedMotion() {
@@ -167,11 +186,20 @@ function centreInRow(link) {
   row.scrollTo({ left, behavior: prefersReducedMotion() ? "auto" : "smooth" });
 }
 
-function applyTheme(theme) {
-  if (!(theme in THEME_COLOR_TOKENS) || document.body.dataset.theme === theme) return;
-  document.body.dataset.theme = theme;
+// Tints the page for a location (null = untinted, e.g. on the cover). The
+// stylesheet's --location-theme picks light or dark text, falling back to the
+// shoot's theme; the browser bar colour follows the page background.
+function applyTheme(shootTheme, location) {
+  const body = document.body;
+  if (location) body.dataset.location = location;
+  else delete body.dataset.location;
+
+  const styles = getComputedStyle(body);
+  const locationTheme = styles.getPropertyValue("--location-theme").trim();
+  const theme = THEMES.includes(locationTheme) ? locationTheme : shootTheme;
+  if (THEMES.includes(theme)) body.dataset.theme = theme;
+
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) {
-    meta.content = getComputedStyle(document.documentElement).getPropertyValue(THEME_COLOR_TOKENS[theme]).trim();
-  }
+  const background = styles.getPropertyValue("--color-bg").trim();
+  if (meta && background) meta.content = background;
 }

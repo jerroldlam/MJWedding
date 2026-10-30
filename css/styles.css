@@ -14,6 +14,13 @@
   --champagne: #B89B72;
   --champagne-strong: #8C7350;
 
+  /* Location backgrounds, sampled from each location's photos */
+  --shell: #F3ECE2;
+  --mist: #EFEDF2;
+  --oat: #ECE5D8;
+  --slate: #1D1F24;
+  --espresso: #231D19;
+
   /* Fonts */
   --font-display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", Georgia, serif;
   --font-ui: "Jost", "Futura", "Century Gothic", "Helvetica Neue", Arial, sans-serif;
@@ -51,7 +58,7 @@
 }
 
 /* ==========================================================================
-   Themes (switched by data-theme on <body>; light = Outdoor, dark = Studio)
+   Themes (switched by data-theme on <body>: light or dark text and lines)
    ========================================================================== */
 
 body[data-theme="light"] {
@@ -68,6 +75,34 @@ body[data-theme="dark"] {
   --color-muted: var(--ash);
   --color-cover-placeholder: #262320;
   --color-line: rgba(237, 231, 221, 0.14);
+}
+
+/* Each location tints the page while it's on screen (data-location is set by
+   nav.js from the location's section id; the cover keeps the plain theme).
+   --location-theme tells nav.js which text colours (data-theme) go with it. */
+body[data-location="outdoor-beach"] {
+  --color-bg: var(--shell);
+  --location-theme: light;
+}
+
+body[data-location="outdoor-flower-field"] {
+  --color-bg: var(--mist);
+  --location-theme: light;
+}
+
+body[data-location="outdoor-forest"] {
+  --color-bg: var(--slate);
+  --location-theme: dark;
+}
+
+body[data-location="outdoor-open-field"] {
+  --color-bg: var(--oat);
+  --location-theme: light;
+}
+
+body[data-location="studio"] {
+  --color-bg: var(--espresso);
+  --location-theme: dark;
 }
 
 /* ==========================================================================
