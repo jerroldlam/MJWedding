@@ -1,4 +1,33 @@
 /* ==========================================================================
+   Fonts: self-hosted Latin subsets of the only faces the site uses
+   (licence in fonts/OFL.txt)
+   ========================================================================== */
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/cormorant-garamond-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/cormorant-garamond-400-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/jost-400.woff2") format("woff2");
+}
+
+/* ==========================================================================
    Tokens
    ========================================================================== */
 
