@@ -16,6 +16,7 @@ import { parseHash } from "./routes.js";
 const READY_EVENT = "photobook:gallery-ready";
 const THEMES = ["light", "dark"];
 const SITE_TITLE = "May & Jerrold";
+const SCROLL_SETTLE_MS = 300;
 
 let pages = [];
 let byPath = new Map();
@@ -75,6 +76,21 @@ function setup(manifest) {
 
   document.addEventListener("click", onLinkClick);
   window.addEventListener("popstate", onPopState);
+  // Phones often unload a background tab and reload it later, and a reload
+  // ignores history changes made while the page unloads. Remember the guest's
+  // place when scrolling settles and when the page is hidden instead.
+  let settle = null;
+  window.addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(settle);
+      settle = setTimeout(saveScroll, SCROLL_SETTLE_MS);
+    },
+    { passive: true },
+  );
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveScroll();
+  });
   initialRoute();
 }
 
@@ -145,13 +161,21 @@ function initialRoute() {
   if (!valid) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
     show(null, { scroll: "top", focus: false });
+  } else if (history.state?.page || history.state?.viewer) {
+    // A reload or restored tab: the entries beneath are already there.
+    const saved = history.state.scroll;
+    show(page, { scroll: typeof saved === "number" ? saved : page ? "top" : "none", focus: false });
   } else if (page) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
     history.pushState({ page: "location", depth: 1 }, "", `#${page.route}`);
     if (photoKey) history.pushState({ viewer: true }, "", `#photo/${photoKey}`);
-    show(page, { scroll: "top", focus: !photoKey });
+    // No focus on arrival: the page starts at the heading, and focusing it
+    // would draw a focus box before the guest has done anything.
+    show(page, { scroll: "top", focus: false });
   } else {
     // A plain contents load; the browser handles any "#about"-style anchor.
+    // Marking the entry as ours lets a reload return to the saved place.
+    history.replaceState({ page: "contents" }, "");
     show(null, { scroll: "none", focus: false });
   }
 }

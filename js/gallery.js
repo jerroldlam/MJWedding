@@ -12,6 +12,9 @@ import { classifyShape, composeRows } from "./spreads.js";
 const MANIFEST_URL = "data/photos.json";
 const WIDE_QUERY = "(min-width: 40rem)";
 const GALLERY_MAX_PX = 1400;
+// Mirror the stylesheet's height caps (90% of the screen, 80% for lone portraits).
+const ROW_CAP_VH = 90;
+const SINGLE_CAP_VH = 80;
 const READY_EVENT = "photobook:gallery-ready";
 const SIZES = ["sm", "md", "lg"];
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
@@ -216,7 +219,7 @@ function layoutChapter({ spread, tiles }, wide, reveal) {
 
     for (const tile of members) {
       const share = kind === "group" ? tile.aspect / totalAspect : 1;
-      tile.img.sizes = `(min-width: 87.5rem) ${Math.round(share * GALLERY_MAX_PX)}px, ${Math.round(share * 100)}vw`;
+      tile.img.sizes = tileSizes(tile.aspect, share, kind);
       row.append(tile.figure);
     }
     if (kind === "group") {
@@ -230,6 +233,22 @@ function layoutChapter({ spread, tiles }, wide, reveal) {
 
   // Moving existing figures keeps already-loaded images (no re-download).
   spread.replaceChildren(...rowEls);
+}
+
+// A tile's width is its share of the row, unless the row's height cap makes it
+// narrower (e.g. a pair of portraits on a laptop), so the browser doesn't fetch
+// a larger photo than it shows. Browsers that can't read min() here skip those
+// entries and use the plain share.
+function tileSizes(aspect, share, kind) {
+  const cap = Math.round(aspect * (kind === "single" ? SINGLE_CAP_VH : ROW_CAP_VH));
+  const px = Math.round(share * GALLERY_MAX_PX);
+  const vw = Math.round(share * 100);
+  return [
+    `(min-width: 87.5rem) min(${px}px, ${cap}vh)`,
+    `(min-width: 87.5rem) ${px}px`,
+    `min(${vw}vw, ${cap}vh)`,
+    `${vw}vw`,
+  ].join(", ");
 }
 
 // Only the first layout reveals; rows rebuilt on a breakpoint change show at once.
