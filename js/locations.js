@@ -1,13 +1,15 @@
 /*
  * Location menu: on the contents page, a card per location (one of its
  * photos, its name, shoot and photo count) that opens that location's page
- * (pages.js handles the click). Built from the manifest once the gallery is
- * ready; hidden until then.
+ * (pages.js handles the click). Each card wears its location page's colours:
+ * it carries the same data-location and data-theme the page puts on <body>.
+ * Built from the manifest once the gallery is ready; hidden until then.
  */
 
 const READY_EVENT = "photobook:gallery-ready";
 // Two columns on phones, three on tablets, five in a row on wide screens.
 const CARD_SIZES = "(min-width: 87.5rem) 17rem, (min-width: 64rem) 19vw, (min-width: 40rem) 31vw, 47vw";
+const THEMES = ["light", "dark"];
 
 export function init() {
   document.addEventListener(READY_EVENT, (event) => buildMenu(event.detail.manifest), { once: true });
@@ -39,6 +41,12 @@ function buildMenu(manifest) {
   if (items.length === 0) return;
 
   list.replaceChildren(...items);
+  // Text colours follow the location, as pages.js does for the page: its
+  // --location-theme, or else the shoot's theme (already set)
+  for (const card of list.querySelectorAll(".locations__card")) {
+    const theme = getComputedStyle(card).getPropertyValue("--location-theme").trim();
+    if (THEMES.includes(theme)) card.dataset.theme = theme;
+  }
   menu.hidden = false;
   // iOS Safari only applies :active (the press dip) when a touch listener exists.
   menu.addEventListener("touchstart", () => {}, { passive: true });
@@ -53,6 +61,9 @@ function createCard(shoot, chapter, section) {
   const link = el("a", "locations__card");
   link.href = `#${section.dataset.route}`;
   link.dataset.pageLink = section.dataset.route;
+  // The card wears its location page's colours (the same CSS rules as the page)
+  link.dataset.location = section.id;
+  link.dataset.theme = shoot.theme;
 
   const frame = el("span", "locations__photo");
   frame.style.backgroundColor = photo.color || "transparent";
