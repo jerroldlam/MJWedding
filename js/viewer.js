@@ -9,7 +9,7 @@
  * the tile of the photo last viewed (skipped when reduced motion is preferred).
  */
 
-import { routeFor } from "./routes.js";
+import { parseHash, routeFor } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 const HASH_PREFIX = "#photo/";
@@ -128,7 +128,8 @@ function buildDialog() {
 }
 
 function keyFromHash(hash) {
-  return hash.startsWith(HASH_PREFIX) ? decodeURIComponent(hash.slice(HASH_PREFIX.length)) : null;
+  const route = parseHash(hash);
+  return route.kind === "photo" ? route.photoKey : null;
 }
 
 function hashFor(index) {
