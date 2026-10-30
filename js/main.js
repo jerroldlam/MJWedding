@@ -9,10 +9,12 @@
 
 import { init as initGallery } from "./gallery.js";
 import { init as initNav } from "./nav.js";
+import { init as initViewer } from "./viewer.js";
 
 const features = [
   { name: "gallery", init: initGallery },
   { name: "nav", init: initNav },
+  { name: "viewer", init: initViewer },
 ];
 
 function start() {

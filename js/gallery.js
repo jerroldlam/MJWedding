@@ -142,7 +142,12 @@ function createTile(shoot, chapter, photo) {
   // Sources are assigned by loadTileImage when the tile nears the viewport.
   img.dataset.srcset = SIZES.map((size) => `${photo.src[size].url} ${photo.src[size].width}w`).join(", ");
   img.dataset.src = photo.src.md.url;
-  figure.append(img);
+
+  // A real link makes the tile focusable and shareable; the viewer intercepts it.
+  const link = el("a", { className: "tile__link" });
+  link.href = `#photo/${figure.dataset.photo}`;
+  link.append(img);
+  figure.append(link);
 
   return {
     figure,
