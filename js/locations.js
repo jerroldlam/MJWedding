@@ -1,7 +1,8 @@
 /*
  * Location menu: on the contents page, a card per location (the couple's
  * favourite photo, held by album corners with a light line drawn inside it, a
- * chapter numeral, its name, a short caption and its photo count) that opens
+ * chapter numeral, its name, a short caption and an invitation to view its
+ * photos) that opens
  * that location's page
  * (pages.js handles the click). Each card wears its location page's colours:
  * it carries the same data-location and data-theme the page puts on <body>.
@@ -126,7 +127,7 @@ function applyWords() {
     name.textContent = place;
     captionEl.textContent = caption(shoot.id, chapter.id);
     captionEl.hidden = !captionEl.textContent;
-    meta.textContent = photos;
+    meta.textContent = w.viewPhotos(photos);
     // The name and meta are separate blocks; spell out the pause for screen readers.
     link.setAttribute("aria-label", w.cardLabel(place, photos));
   }
