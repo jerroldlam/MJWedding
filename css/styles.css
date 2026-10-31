@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Fonts: self-hosted Latin subsets of the only faces the site uses
-   (licence in fonts/OFL.txt)
+   Fonts: self-hosted Latin subsets of the only faces the site uses, plus a
+   Chinese subset for the Chinese view (licences in fonts/OFL.txt)
    ========================================================================== */
 
 @font-face {
@@ -27,6 +27,18 @@
   src: url("../fonts/jost-400.woff2") format("woff2");
 }
 
+/* Noto Serif SC, cut to only the Chinese characters the site uses
+   (tools/subset_chinese_font.py). unicode-range means it's only downloaded
+   when Chinese text is shown, so English readers never fetch it. */
+@font-face {
+  font-family: "Photobook Serif SC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/noto-serif-sc-400-subset.woff2") format("woff2");
+  unicode-range: U+3000-303F, U+4E00-9FFF, U+FF00-FFEF;
+}
+
 /* ==========================================================================
    Tokens
    ========================================================================== */
@@ -51,8 +63,8 @@
   --espresso: #231D19;
 
   /* Fonts */
-  --font-display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", Georgia, serif;
-  --font-ui: "Jost", "Futura", "Century Gothic", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Cormorant Garamond", "Cormorant", "Photobook Serif SC", Garamond, "Times New Roman", Georgia, serif;
+  --font-ui: "Jost", "Photobook Serif SC", "Futura", "Century Gothic", "Helvetica Neue", Arial, sans-serif;
 
   /* Type scale */
   --text-names: clamp(3rem, 11vw + 0.5rem, 7.5rem);
@@ -183,6 +195,54 @@ img {
 }
 
 /* ==========================================================================
+   Language (language.js): English or Simplified Chinese
+   ========================================================================== */
+
+/* Static text comes in both languages (data-lang); <html lang>, set by
+   language.js before the first paint, shows one of them */
+:root:not(:lang(zh)) [data-lang="zh"],
+:root:lang(zh) [data-lang="en"] {
+  display: none;
+}
+
+/* Chinese has no capitals to space out */
+:root:lang(zh) {
+  --tracking-label: 0.12em;
+}
+
+/* The 中文 / EN switch: a small pill in a 44px tap target */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+}
+
+.lang-switch[hidden] {
+  display: none;
+}
+
+.lang-switch__label {
+  padding: 0.3em 0.85em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+/* The phone's own Chinese font, so English readers never download the subset */
+.lang-switch__label:lang(zh) {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ==========================================================================
    Cover
    ========================================================================== */
 
@@ -241,6 +301,16 @@ img {
   overflow-wrap: break-word;
 }
 
+/* The couple's Chinese names, in the Chinese view only */
+.cover__names-zh {
+  margin: calc(-1 * var(--space-xs)) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.2rem + 2vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em; /* balances the trailing letter-spacing */
+}
+
 .cover__amp {
   font-style: italic;
   font-weight: 400;
@@ -280,6 +350,18 @@ img {
   text-decoration-color: var(--color-accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.5em;
+}
+
+/* Top right, inside the gold frame */
+.lang-switch--cover {
+  position: absolute;
+  top: calc(max(var(--space-sm), env(safe-area-inset-top)) + var(--space-xs));
+  right: calc(max(var(--space-sm), env(safe-area-inset-right)) + var(--space-xs));
+  z-index: 2;
+}
+
+:root:lang(zh) .cover__tagline {
+  font-size: 1.0625rem;
 }
 
 .cover__cue-arrow {
@@ -355,7 +437,8 @@ img {
 }
 
 /* The names glow warmly; a smaller dark shadow keeps them legible */
-.cover:has(.cover__image) .cover__names {
+.cover:has(.cover__image) .cover__names,
+.cover:has(.cover__image) .cover__names-zh {
   text-shadow: 0 0 28px rgba(255, 222, 176, 0.38), 0 1px 10px rgba(36, 22, 10, 0.4);
 }
 
@@ -487,6 +570,13 @@ img {
   text-align: left;
 }
 
+/* Chinese characters fill their square, so they read evenly a little smaller
+   than Cormorant, with more space between lines */
+:root:lang(zh) .about__story {
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  line-height: 1.9;
+}
+
 .about__story p {
   margin: 0;
 }
@@ -596,6 +686,10 @@ body[data-page="contents"] .page-bar {
   white-space: nowrap;
   color: var(--color-text);
   text-decoration: none;
+}
+
+.page-bar .lang-switch {
+  flex: none;
 }
 
 /* Scrolls sideways on narrow screens; the fading trailing edge hints at more */
@@ -1296,6 +1390,10 @@ html.viewer-open {
 
   .cover:not(.is-entered) .cover__names {
     animation: cover-rise 1.8s cubic-bezier(.25, .6, .3, 1) 0.5s both;
+  }
+
+  .cover:not(.is-entered) .cover__names-zh {
+    animation: cover-fade 1.8s ease-out 0.8s both;
   }
 
   .cover:not(.is-entered) .cover__divider {

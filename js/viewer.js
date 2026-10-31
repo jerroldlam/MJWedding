@@ -13,6 +13,7 @@
  * normal size.
  */
 
+import { words, placeName, onLanguageChange } from "./i18n.js";
 import { parseHash, routeFor } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -70,6 +71,8 @@ function setup(manifest) {
   sequence = buildSequence(manifest);
   byKey = new Map(sequence.map((entry, index) => [entry.key, index]));
   dom = buildDialog();
+  applyWords();
+  onLanguageChange(applyWords);
   document.body.append(dom.dialog);
 
   document.getElementById("gallery")?.addEventListener("click", (event) => {
@@ -104,7 +107,9 @@ function buildSequence(manifest) {
         entries.push({
           key: `${shoot.id}/${chapter.id}/${photo.id}`,
           photo,
-          title: chapter.title,
+          shootId: shoot.id,
+          chapterId: chapter.id,
+          title: chapter.title, // English; the position line uses placeName()
           index: i + 1,
           count: chapter.photos.length,
           start,
@@ -124,23 +129,24 @@ function el(tag, className, attrs = {}) {
   return node;
 }
 
-function button(className, label, iconClass) {
-  const node = el("button", className, { type: "button", "aria-label": label });
+function button(className, iconClass) {
+  const node = el("button", className, { type: "button" });
   node.append(el("span", iconClass, { "aria-hidden": "true" }));
   return node;
 }
 
 function buildDialog() {
-  const dialog = el("dialog", "viewer", { "aria-label": "Photo viewer" });
+  // Labels are set by applyWords().
+  const dialog = el("dialog", "viewer");
   const stage = el("div", "viewer__stage");
   const frame = el("figure", "viewer__frame");
   const img = el("img", "viewer__img", { alt: "", decoding: "async" });
   frame.append(img);
   stage.append(frame);
 
-  const close = button("viewer__close", "Close", "viewer__icon viewer__icon--close");
-  const prev = button("viewer__prev", "Previous photo", "viewer__icon viewer__icon--prev");
-  const next = button("viewer__next", "Next photo", "viewer__icon viewer__icon--next");
+  const close = button("viewer__close", "viewer__icon viewer__icon--close");
+  const prev = button("viewer__prev", "viewer__icon viewer__icon--prev");
+  const next = button("viewer__next", "viewer__icon viewer__icon--next");
   const position = el("p", "viewer__position", { "aria-live": "polite" });
   dialog.append(stage, prev, next, close, position);
 
@@ -157,6 +163,16 @@ function buildDialog() {
   wireGestures(stage);
 
   return { dialog, stage, frame, img, close, prev, next, position };
+}
+
+// Labels in the current language; runs at setup and on every language switch
+// (the switches sit under the open viewer, so never while it's showing).
+function applyWords() {
+  const w = words();
+  dom.dialog.setAttribute("aria-label", w.viewer);
+  dom.close.setAttribute("aria-label", w.close);
+  dom.prev.setAttribute("aria-label", w.previousPhoto);
+  dom.next.setAttribute("aria-label", w.nextPhoto);
 }
 
 function keyFromHash(hash) {
@@ -253,7 +269,7 @@ function show(index) {
   dom.img.srcset = srcsetFor(photo);
   dom.img.src = photo.src.md.url;
 
-  dom.position.textContent = `${entry.title} · ${entry.index} / ${entry.count}`;
+  dom.position.textContent = `${placeName(entry.shootId, entry.chapterId, entry.title)} · ${entry.index} / ${entry.count}`;
   dom.prev.disabled = index === entry.start;
   dom.next.disabled = index === entry.end;
 

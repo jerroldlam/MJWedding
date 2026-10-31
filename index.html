@@ -20,6 +20,7 @@
   <link rel="preload" href="fonts/cormorant-garamond-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/cormorant-garamond-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jost-400.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="js/language.js"></script>
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -37,10 +38,15 @@
     <div class="cover__frame" aria-hidden="true"></div>
     <div class="cover__content">
       <h1 class="cover__names">May <span class="cover__amp">&amp;</span> Jerrold</h1>
+      <p class="cover__names-zh" data-lang="zh" lang="zh-Hans">黄育娴 &amp; 蓝钿宇</p>
       <span class="cover__divider" aria-hidden="true"></span>
-      <p class="cover__tagline">Pre-wedding photobook</p>
+      <p class="cover__tagline"><span data-lang="en">Pre-wedding photobook</span><span data-lang="zh" lang="zh-Hans">婚纱照</span></p>
     </div>
-    <a class="cover__cue" href="#about">Begin <span class="cover__cue-arrow" aria-hidden="true"></span></a>
+    <a class="cover__cue" href="#about"><span data-lang="en">Begin</span><span data-lang="zh" lang="zh-Hans">开始</span> <span class="cover__cue-arrow" aria-hidden="true"></span></a>
+    <button class="lang-switch lang-switch--cover" type="button" data-lang-switch hidden>
+      <span class="lang-switch__label" data-lang="en" lang="zh-Hans">中文</span>
+      <span class="lang-switch__label" data-lang="zh" lang="en">EN</span>
+    </button>
   </header>
 
   <section id="about" class="about" aria-labelledby="about-title" tabindex="-1">
@@ -56,26 +62,37 @@
         <path class="about__piece about__piece--b" d="M200 0L270 0C284 0 288 -10 282 -22C270 -44 288 -60 300 -60C312 -60 330 -44 318 -22C312 -10 316 0 330 0L400 0L400 70C400 84 390 88 378 82C356 70 340 88 340 100C340 112 356 130 378 118C390 112 400 116 400 130L400 200L330 200C316 200 312 190 318 178C330 156 312 140 300 140C288 140 270 156 282 178C288 190 284 200 270 200L200 200L200 130C200 115 208 110 220 116C236 124 252 108 252 100C252 92 236 76 220 84C208 90 200 85 200 70L200 0Z"/>
       </g>
     </svg>
-    <h2 id="about-title" class="about__title">Our story</h2>
+    <h2 id="about-title" class="about__title"><span data-lang="en">Our story</span><span data-lang="zh" lang="zh-Hans">我们的故事</span></h2>
     <span class="about__divider" aria-hidden="true"></span>
     <div class="about__story">
-      <p>May and Jerrold met at NUS. Though they came from very different faculties, they found each other in an unexpected place: volunteering.</p>
-      <p>They soon realised they were like pieces from two different jigsaw puzzles that somehow fit together. Where everyone else groaned at Jerrold’s cold jokes, May couldn’t stop laughing.</p>
-      <p>And so began their journey together, from student days into adulthood, and now on to their next chapter.</p>
+      <div data-lang="en">
+        <p>May and Jerrold met at NUS. Though they came from very different faculties, they found each other in an unexpected place: volunteering.</p>
+        <p>They soon realised they were like pieces from two different jigsaw puzzles that somehow fit together. Where everyone else groaned at Jerrold’s cold jokes, May couldn’t stop laughing.</p>
+        <p>And so began their journey together, from student days into adulthood, and now on to their next chapter.</p>
+      </div>
+      <div data-lang="zh" lang="zh-Hans">
+        <p>育娴和钿宇在新加坡国立大学相识。虽然来自截然不同的学院，他们却在一个意想不到的地方遇见了彼此：做义工。</p>
+        <p>他们很快发现，彼此就像来自两副不同拼图的碎片，却奇妙地契合在一起。别人听了钿宇的冷笑话直摇头，育娴却笑个不停。</p>
+        <p>就这样，他们一起从学生时代走到成年，如今迈向人生的新篇章。</p>
+      </div>
     </div>
   </section>
 
-  <main id="photos" class="photos" tabindex="-1" aria-label="Photos">
+  <main id="photos" class="photos" tabindex="-1" aria-label="Photos" data-label-zh="照片">
     <nav id="locations" class="locations" aria-labelledby="locations-title" hidden>
-      <h2 id="locations-title" class="locations__title" tabindex="-1">Choose a location</h2>
+      <h2 id="locations-title" class="locations__title" tabindex="-1"><span data-lang="en">Choose a location</span><span data-lang="zh" lang="zh-Hans">选择地点</span></h2>
       <span class="locations__divider" aria-hidden="true"></span>
       <ul class="locations__list"></ul>
     </nav>
-    <nav id="page-bar" class="page-bar" aria-label="Locations" hidden>
-      <a class="page-bar__back" href="./" data-page-link="contents" aria-label="Back to contents"><span aria-hidden="true">‹</span> Contents</a>
+    <nav id="page-bar" class="page-bar" aria-label="Locations" data-label-zh="地点" hidden>
+      <a class="page-bar__back" href="./" data-page-link="contents" aria-label="Back to contents" data-label-zh="返回目录"><span aria-hidden="true">‹</span> <span data-lang="en">Contents</span><span data-lang="zh" lang="zh-Hans">目录</span></a>
       <ul class="page-bar__locations"></ul>
+      <button class="lang-switch" type="button" data-lang-switch hidden>
+        <span class="lang-switch__label" data-lang="en" lang="zh-Hans">中文</span>
+        <span class="lang-switch__label" data-lang="zh" lang="en">EN</span>
+      </button>
     </nav>
-    <section id="gallery" class="gallery" aria-label="Gallery"></section>
+    <section id="gallery" class="gallery" aria-label="Gallery" data-label-zh="照片集"></section>
   </main>
 
   <footer class="site-footer">
