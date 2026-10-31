@@ -1,20 +1,24 @@
 /*
- * Location menu: on the contents page, a card per location (one of its
- * photos, its name, shoot and photo count) that opens that location's page
+ * Location menu: on the contents page, a card per location (the couple's
+ * favourite photo, held by album corners with a light line drawn inside it, a
+ * chapter numeral, its name, a short caption and its photo count) that opens
+ * that location's page
  * (pages.js handles the click). Each card wears its location page's colours:
  * it carries the same data-location and data-theme the page puts on <body>.
  * Its words follow the language (i18n.js), relabelled when the guest switches.
  * Built from the manifest once the gallery is ready; hidden until then.
  */
 
-import { words, placeName, onLanguageChange } from "./i18n.js";
+import { words, placeName, caption, onLanguageChange } from "./i18n.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 // Two columns on phones, three on tablets, five in a row on wide screens.
 const CARD_SIZES = "(min-width: 87.5rem) 17rem, (min-width: 64rem) 19vw, (min-width: 40rem) 31vw, 47vw";
 const THEMES = ["light", "dark"];
+// Chapter numerals above the card names, in card order
+const NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
-// What applyWords() labels: each card's name, count and spoken label.
+// What applyWords() labels: each card's name, caption, count and spoken label.
 const cards = [];
 
 export function init() {
@@ -34,13 +38,14 @@ function buildMenu(manifest) {
   const gallery = document.getElementById("gallery");
   if (!list || !gallery) return;
 
+  let position = 0;
   const items = manifest.shoots.flatMap((shoot) =>
     shoot.chapters
       .map((chapter) => {
         const section = gallery.querySelector(
           `.chapter[data-shoot="${CSS.escape(shoot.id)}"][data-chapter="${CSS.escape(chapter.id)}"]`,
         );
-        return section ? createCard(shoot, chapter, section) : null;
+        return section ? createCard(shoot, chapter, section, position++) : null;
       })
       .filter(Boolean),
   );
@@ -60,7 +65,7 @@ function buildMenu(manifest) {
   menu.addEventListener("touchstart", () => {}, { passive: true });
 }
 
-function createCard(shoot, chapter, section) {
+function createCard(shoot, chapter, section, position) {
   // The couple's favourite (cardPhoto, set in the photo script) represents the
   // location; otherwise its first portrait photo, which fills the portrait frame
   // uncropped, or else its first photo.
@@ -90,12 +95,22 @@ function createCard(shoot, chapter, section) {
   img.srcset = ["sm", "md"].map((size) => `${photo.src[size].url} ${photo.src[size].width}w`).join(", ");
   img.src = photo.src.sm.url;
   frame.append(img);
+  // A light line drawn inside the print, and album corners holding it (decorative)
+  const line = el("span", "locations__line");
+  const corners = el("span", "locations__corners");
+  line.setAttribute("aria-hidden", "true");
+  corners.setAttribute("aria-hidden", "true");
+  frame.append(line, corners);
 
-  // The name, count and spoken label are filled in by applyWords().
+  // A chapter numeral (decorative); the name, caption, count and spoken label
+  // are filled in by applyWords().
+  const number = el("span", "locations__number", NUMERALS[position] ?? "");
+  number.setAttribute("aria-hidden", "true");
   const name = el("span", "locations__name");
+  const captionEl = el("span", "locations__caption");
   const meta = el("span", "locations__meta");
-  link.append(frame, name, meta);
-  cards.push({ shoot, chapter, count, link, name, meta });
+  link.append(frame, number, name, captionEl, meta);
+  cards.push({ shoot, chapter, count, link, name, captionEl, meta });
 
   const item = el("li");
   item.append(link);
@@ -105,10 +120,12 @@ function createCard(shoot, chapter, section) {
 // Labels in the current language; runs at build and on every language switch.
 function applyWords() {
   const w = words();
-  for (const { shoot, chapter, count, link, name, meta } of cards) {
+  for (const { shoot, chapter, count, link, name, captionEl, meta } of cards) {
     const place = placeName(shoot.id, chapter.id, chapter.title);
     const photos = w.photoCount(count);
     name.textContent = place;
+    captionEl.textContent = caption(shoot.id, chapter.id);
+    captionEl.hidden = !captionEl.textContent;
     meta.textContent = photos;
     // The name and meta are separate blocks; spell out the pause for screen readers.
     link.setAttribute("aria-label", w.cardLabel(place, photos));
