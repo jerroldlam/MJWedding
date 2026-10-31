@@ -69,7 +69,7 @@
   /* Type scale */
   --text-names: clamp(3rem, 11vw + 0.5rem, 7.5rem);
   --text-body: 1rem;
-  --text-label: 0.8125rem;
+  --text-label: 0.875rem;
   --tracking-label: 0.24em;
 
   /* Spacing */
@@ -205,8 +205,10 @@ img {
   display: none;
 }
 
-/* Chinese has no capitals to space out */
+/* Chinese has no capitals to space out, and its denser characters need a
+   slightly larger size than the English labels */
 :root:lang(zh) {
+  --text-label: 0.9375rem;
   --tracking-label: 0.12em;
 }
 
@@ -573,7 +575,7 @@ img {
 /* Chinese characters fill their square, so they read evenly a little smaller
    than Cormorant, with more space between lines */
 :root:lang(zh) .about__story {
-  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.3125rem);
   line-height: 1.9;
 }
 
@@ -874,7 +876,7 @@ body[data-page="contents"] .page-bar {
 }
 
 .chapter__next-label {
-  font-size: 0.875rem;
+  font-size: var(--text-label);
   color: var(--color-muted);
 }
 
