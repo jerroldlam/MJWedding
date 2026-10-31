@@ -602,31 +602,16 @@ img {
   pointer-events: none;
 }
 
-.about__piece {
-  vector-effect: non-scaling-stroke;
-}
-
-/* One puzzle: a soft champagne piece */
+/* One puzzle: a faint wash of muted wedding red */
 .about__piece--a {
-  fill: var(--champagne);
-  fill-opacity: 0.16;
+  fill: #A8433A;
+  fill-opacity: 0.12;
 }
 
-/* The other: pale linen with a fine dotted print and a hairline edge */
+/* The other: a faint wash of soft sage */
 .about__piece--b {
-  fill: url(#about-puzzle-print);
-  stroke: var(--champagne);
-  stroke-opacity: 0.55;
-  stroke-width: 1;
-}
-
-.about__print-ground {
-  fill: var(--linen);
-}
-
-.about__print-dot {
-  fill: var(--stone);
-  fill-opacity: 0.16;
+  fill: #7F9A74;
+  fill-opacity: 0.12;
 }
 
 /* ==========================================================================
