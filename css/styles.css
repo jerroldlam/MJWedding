@@ -743,14 +743,6 @@ body[data-page="contents"] .page-bar {
   text-underline-offset: 0.5em;
 }
 
-/* Between the Outdoor locations and Studio */
-.page-bar__sep {
-  flex: none;
-  width: 1px;
-  height: 1.25rem;
-  background: var(--color-line);
-}
-
 /* Inset, so the scrolling list doesn't clip it */
 .page-bar__back:focus-visible,
 .page-bar__link:focus-visible {

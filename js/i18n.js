@@ -24,21 +24,16 @@ const PLACES_ZH = {
   "outdoor/open-field": "田野",
   "studio/studio": "影棚",
 };
-const SHOOTS_ZH = { outdoor: "户外", studio: "影棚" };
 
 export function placeName(shootId, chapterId, title) {
   return lang() === "zh" ? PLACES_ZH[`${shootId}/${chapterId}`] ?? title : title;
-}
-
-export function shootName(shootId, title) {
-  return lang() === "zh" ? SHOOTS_ZH[shootId] ?? title : title;
 }
 
 // cardLabel's count is the already-formatted photoCount.
 const WORDS = {
   en: {
     photoCount: (n) => `${n} ${n === 1 ? "photo" : "photos"}`,
-    cardLabel: (place, shoot, count) => (shoot ? `${place}, ${shoot}, ${count}` : `${place}, ${count}`),
+    cardLabel: (place, count) => `${place}, ${count}`,
     photoAlt: (alt, place, index, total) => (alt ? `${alt}, photo ${index} of ${total}` : `Photo ${index} of ${total}`),
     photosComingSoon: "Photos coming soon",
     endOf: (place) => `End of ${place}`,
@@ -52,7 +47,7 @@ const WORDS = {
   },
   zh: {
     photoCount: (n) => `${n} 张照片`,
-    cardLabel: (place, shoot, count) => (shoot ? `${place}，${shoot}，${count}` : `${place}，${count}`),
+    cardLabel: (place, count) => `${place}，${count}`,
     // Chinese sentences use the couple's Chinese names
     photoAlt: (alt, place, index, total) => `育娴和钿宇在${place}，第 ${index} 张，共 ${total} 张`,
     photosComingSoon: "照片即将上传",

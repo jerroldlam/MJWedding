@@ -110,13 +110,7 @@ function setup(manifest) {
 
 function buildSwitcher() {
   const items = [];
-  pages.forEach((page, index) => {
-    // A thin divider between shoots (the Outdoor locations, then Studio).
-    if (index > 0 && page.shootId !== pages[index - 1].shootId) {
-      const sep = el("li", "page-bar__sep");
-      sep.setAttribute("aria-hidden", "true");
-      items.push(sep);
-    }
+  pages.forEach((page) => {
     const link = el("a", "page-bar__link");
     link.href = `#${page.route}`;
     link.dataset.pageLink = page.route;
