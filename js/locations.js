@@ -7,7 +7,7 @@
  * Built from the manifest once the gallery is ready; hidden until then.
  */
 
-import { words, placeName, shootName, onLanguageChange } from "./i18n.js";
+import { words, placeName, onLanguageChange } from "./i18n.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 // Two columns on phones, three on tablets, five in a row on wide screens.
@@ -69,7 +69,6 @@ function createCard(shoot, chapter, section) {
     chapter.photos.find((p) => p.height > p.width) ??
     chapter.photos[0];
   const count = chapter.photos.length;
-  const solo = shoot.chapters.length === 1;
 
   const link = el("a", "locations__card");
   link.href = `#${section.dataset.route}`;
@@ -96,7 +95,7 @@ function createCard(shoot, chapter, section) {
   const name = el("span", "locations__name");
   const meta = el("span", "locations__meta");
   link.append(frame, name, meta);
-  cards.push({ shoot, chapter, solo, count, link, name, meta });
+  cards.push({ shoot, chapter, count, link, name, meta });
 
   const item = el("li");
   item.append(link);
@@ -106,13 +105,12 @@ function createCard(shoot, chapter, section) {
 // Labels in the current language; runs at build and on every language switch.
 function applyWords() {
   const w = words();
-  for (const { shoot, chapter, solo, count, link, name, meta } of cards) {
+  for (const { shoot, chapter, count, link, name, meta } of cards) {
     const place = placeName(shoot.id, chapter.id, chapter.title);
-    const shootTitle = shootName(shoot.id, shoot.title);
     const photos = w.photoCount(count);
     name.textContent = place;
-    meta.textContent = solo ? photos : `${shootTitle} · ${photos}`;
+    meta.textContent = photos;
     // The name and meta are separate blocks; spell out the pause for screen readers.
-    link.setAttribute("aria-label", w.cardLabel(place, solo ? null : shootTitle, photos));
+    link.setAttribute("aria-label", w.cardLabel(place, photos));
   }
 }

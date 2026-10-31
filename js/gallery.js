@@ -6,7 +6,7 @@
  * pages, viewer). Which page is visible is up to pages.js.
  */
 
-import { words, placeName, shootName, onLanguageChange } from "./i18n.js";
+import { words, placeName, onLanguageChange } from "./i18n.js";
 import { routeFor } from "./routes.js";
 import { classifyShape, composeRows } from "./spreads.js";
 
@@ -101,11 +101,11 @@ function renderEmpty(gallery) {
 function applyWords() {
   const w = words();
   if (emptyNote) emptyNote.textContent = w.photosComingSoon;
-  for (const { shoot, chapter, solo, count, title, meta, images } of labelled) {
+  for (const { shoot, chapter, count, title, meta, images } of labelled) {
     const place = placeName(shoot.id, chapter.id, chapter.title);
     const photos = w.photoCount(count);
     title.textContent = place;
-    meta.textContent = solo ? photos : `${shootName(shoot.id, shoot.title)} · ${photos}`;
+    meta.textContent = photos;
     for (const { img, photo, index } of images) img.alt = w.photoAlt(photo.alt, place, index + 1, count);
   }
 }
@@ -143,7 +143,6 @@ function renderManifest(gallery, manifest) {
       labelled.push({
         shoot,
         chapter,
-        solo,
         count,
         title,
         meta,
