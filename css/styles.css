@@ -974,24 +974,8 @@ body[data-page="contents"] .page-bar {
 }
 
 /* Pressing a photo (finger or mouse) dips it slightly. With a mouse or
-   trackpad, pointing at a photo also dims the rest of its chapter and slowly
-   zooms the photo. Together they hint that photos open. */
-@media (hover: hover) and (pointer: fine) {
-  /* Undimming waits a moment, so crossing the gap between two photos doesn't flash */
-  .tile {
-    transition: opacity 0s 150ms;
-  }
-
-  .chapter:has(.tile:hover) .tile:not(:hover) {
-    opacity: 0.55;
-    transition-delay: 0s;
-  }
-
-  .tile:hover {
-    transition-delay: 0s;
-  }
-}
-
+   trackpad, pointing at a photo also slowly zooms it. Together they hint
+   that photos open. */
 @media (prefers-reduced-motion: no-preference) {
   .tile {
     transition: transform 160ms var(--ease-soft), filter 160ms var(--ease-soft);
@@ -1004,13 +988,6 @@ body[data-page="contents"] .page-bar {
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .tile {
-    transition:
-      opacity 400ms var(--ease-soft) 150ms,
-      transform 160ms var(--ease-soft),
-      filter 160ms var(--ease-soft);
-  }
-
   .tile:hover img {
     transform: scale(1.04);
   }
