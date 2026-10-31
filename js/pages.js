@@ -2,8 +2,9 @@
  * Pages: the photobook shows one page at a time, either the contents (cover,
  * Our story, location cards) or a single location. Each location has its own
  * address (see routes.js), a pinned bar ("‹ Contents" plus every location) and
- * an end panel that leads back to the contents or on to the next location
- * (the last location ends with the couple's closing note).
+ * an end panel that leads with a card for the next location (its photo,
+ * numeral, name and caption, in its colours), with "Back to contents" as a
+ * quiet link (the last location ends with the couple's closing note).
  *
  * History: every page change the guest makes is an entry whose state records
  * `depth` (photobook entries above the contents entry), so "Back to contents"
@@ -17,7 +18,8 @@
  * The bar's location list fades only at the edges where names are hidden.
  */
 
-import { words, placeName, onLanguageChange } from "./i18n.js";
+import { words, placeName, caption, onLanguageChange } from "./i18n.js";
+import { cardPhoto, numeral } from "./locations.js";
 import { parseHash } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -76,6 +78,7 @@ function setup(manifest) {
         return {
           shootId: shoot.id,
           chapterId: chapter.id,
+          chapter,
           theme: shoot.theme,
           sectionId: section.id,
           route: section.dataset.route,
@@ -91,12 +94,20 @@ function setup(manifest) {
   if (pages.length === 0) return;
 
   pages.forEach((page, index) => {
+    page.index = index;
     page.next = pages[index + 1] || null;
   });
   byPath = new Map(pages.map((page) => [page.route, page]));
   history.scrollRestoration = "manual";
 
   pages.forEach((page) => page.section.append(buildEndPanel(page)));
+  // Each next card wears its location's colours: its --location-theme picks
+  // the text set, as on the contents cards
+  for (const page of pages) {
+    if (!page.nextLink) continue;
+    const theme = getComputedStyle(page.nextLink).getPropertyValue("--location-theme").trim();
+    page.nextLink.dataset.theme = THEMES.includes(theme) ? theme : page.next.theme;
+  }
   // The same note at the foot of the contents, after the location cards
   // (unsigned: the footer just below names the couple)
   const contentsClosing = el("div", "contents-closing");
@@ -158,20 +169,50 @@ function buildEndPanel(page) {
   page.homeLink = home;
   // The last location ends the photobook with the couple's closing note
   // instead of "End of …"; the label is still built so applyWords() stays uniform.
-  if (page.next) panel.append(page.endLabel, divider, home);
-  else panel.append(buildClosing({ signed: true }), home);
-
   if (page.next) {
-    const next = el("a", "chapter__next");
-    next.href = `#${page.next.route}`;
-    next.dataset.pageLink = page.next.route;
-    page.nextLink = next;
-    page.nextLabel = el("span", "chapter__next-label");
-    page.nextTitle = el("span", "chapter__next-title");
-    next.append(page.nextLabel, page.nextTitle);
-    panel.append(next);
+    home.classList.add("chapter__home--quiet");
+    panel.append(page.endLabel, divider, buildNextCard(page), home);
+  } else {
+    panel.append(buildClosing({ signed: true }), home);
   }
   return panel;
+}
+
+// The next location as a small card: the same photo and numeral as its
+// contents card, in its colours (data-location; data-theme is set in setup).
+// The words are filled in by applyWords().
+function buildNextCard(page) {
+  const next = el("a", "chapter__next");
+  next.href = `#${page.next.route}`;
+  next.dataset.pageLink = page.next.route;
+  next.dataset.location = page.next.sectionId;
+
+  const photo = cardPhoto(page.next.chapter);
+  const frame = el("span", "chapter__next-photo");
+  frame.style.backgroundColor = photo.color || "transparent";
+  const img = new Image();
+  img.alt = ""; // decorative: the card's words name the location
+  img.width = photo.src.sm.width;
+  img.height = photo.src.sm.height;
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.sizes = "5.5rem";
+  img.srcset = ["sm", "md"].map((size) => `${photo.src[size].url} ${photo.src[size].width}w`).join(", ");
+  img.src = photo.src.sm.url;
+  const corners = el("span", "locations__corners");
+  corners.setAttribute("aria-hidden", "true");
+  frame.append(img, corners);
+
+  const text = el("span", "chapter__next-text");
+  page.nextLabel = el("span", "chapter__next-label");
+  const number = el("span", "chapter__next-number", numeral(page.next.index));
+  number.setAttribute("aria-hidden", "true");
+  page.nextTitle = el("span", "chapter__next-title");
+  page.nextCaption = el("span", "chapter__next-caption");
+  text.append(page.nextLabel, number, page.nextTitle, page.nextCaption);
+  next.append(frame, text);
+  page.nextLink = next;
+  return next;
 }
 
 // The closing note: the Our story jigsaw pair (cloned, so its shared seam
@@ -206,6 +247,8 @@ function applyWords() {
       page.nextLink.setAttribute("aria-label", w.nextLocationLabel(page.next.title));
       page.nextLabel.textContent = w.nextLocation;
       page.nextTitle.textContent = `${page.next.title} ›`;
+      page.nextCaption.textContent = caption(page.next.shootId, page.next.chapterId);
+      page.nextCaption.hidden = !page.nextCaption.textContent;
     }
   }
   for (const { line, sign } of closings) {
