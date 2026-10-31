@@ -92,6 +92,13 @@
   --dur-theme: 350ms;
 }
 
+/* With reduce motion, the page colour changes instantly (decision 8) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-theme: 0ms;
+  }
+}
+
 @media (min-width: 40rem) {
   :root {
     --gutter: 0.5rem;
@@ -1098,6 +1105,8 @@ body[data-page="contents"] .page-bar {
     max(var(--space-sm), env(safe-area-inset-right))
     var(--space-xl)
     max(var(--space-sm), env(safe-area-inset-left));
+  /* A size container, so the cards can follow the guest's text size (below) */
+  container-type: inline-size;
 }
 
 .locations[hidden] {
@@ -1143,6 +1152,15 @@ body[data-page="contents"] .page-bar {
 @media (min-width: 64rem) {
   .locations__list {
     --cols: 5;
+  }
+}
+
+/* Enlarged text (about 150% and up on a phone): one card per row, so names,
+   captions and "View … photos" fit. The container's em follows the text
+   size, whether the phone zooms the page or scales its text. */
+@container (max-width: 15em) {
+  .locations__list {
+    --cols: 1;
   }
 }
 
