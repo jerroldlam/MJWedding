@@ -2,7 +2,8 @@
  * Pages: the photobook shows one page at a time, either the contents (cover,
  * Our story, location cards) or a single location. Each location has its own
  * address (see routes.js), a pinned bar ("‹ Contents" plus every location) and
- * an end panel that leads back to the contents or on to the next location.
+ * an end panel that leads back to the contents or on to the next location
+ * (the last location ends with the couple's closing note).
  *
  * History: every page change the guest makes is an entry whose state records
  * `depth` (photobook entries above the contents entry), so "Back to contents"
@@ -32,6 +33,9 @@ let byPath = new Map();
 let current = null; // null = the contents page
 let fade = null; // the latest page fade still running, if any
 const dom = {};
+// The closing notes (end of the last location, foot of the contents): their
+// line and signature, labelled by applyWords().
+const closings = [];
 
 export function init() {
   document.addEventListener(READY_EVENT, (event) => setup(event.detail.manifest), { once: true });
@@ -80,6 +84,11 @@ function setup(manifest) {
   history.scrollRestoration = "manual";
 
   pages.forEach((page) => page.section.append(buildEndPanel(page)));
+  // The same note at the foot of the contents, after the location cards
+  // (unsigned: the footer just below names the couple)
+  const contentsClosing = el("div", "contents-closing");
+  contentsClosing.append(buildClosing());
+  document.getElementById("locations")?.after(contentsClosing);
   dom.bar = bar;
   dom.list = bar.querySelector(".page-bar__locations");
   dom.cover = document.querySelector(".cover");
@@ -132,7 +141,10 @@ function buildEndPanel(page) {
   home.dataset.pageLink = "contents";
   page.endLabel = el("p", "chapter__end-label");
   page.homeLink = home;
-  panel.append(page.endLabel, divider, home);
+  // The last location ends the photobook with the couple's closing note
+  // instead of "End of …"; the label is still built so applyWords() stays uniform.
+  if (page.next) panel.append(page.endLabel, divider, home);
+  else panel.append(buildClosing({ signed: true }), home);
 
   if (page.next) {
     const next = el("a", "chapter__next");
@@ -145,6 +157,26 @@ function buildEndPanel(page) {
     panel.append(next);
   }
   return panel;
+}
+
+// The closing note: the Our story jigsaw pair (cloned, so its shared seam
+// stays in one place), a line of thanks, a rule and, when signed, the
+// couple's names (the contents leaves them to the footer just below).
+function buildClosing({ signed = false } = {}) {
+  const closing = el("div", "chapter__closing");
+  const puzzle = document.querySelector(".about__puzzle")?.cloneNode(true);
+  if (puzzle) {
+    puzzle.setAttribute("class", "chapter__closing-puzzle");
+    closing.append(puzzle);
+  }
+  const rule = el("span", "chapter__divider");
+  rule.setAttribute("aria-hidden", "true");
+  const line = el("p", "chapter__closing-line");
+  closing.append(line, rule);
+  const sign = signed ? el("p", "chapter__closing-sign") : null;
+  if (sign) closing.append(sign);
+  closings.push({ line, sign });
+  return closing;
 }
 
 // Labels in the current language; runs at setup and on every language switch.
@@ -160,6 +192,10 @@ function applyWords() {
       page.nextLabel.textContent = w.nextLocation;
       page.nextTitle.textContent = `${page.next.title} ›`;
     }
+  }
+  for (const { line, sign } of closings) {
+    line.textContent = w.closingLine;
+    if (sign) sign.textContent = w.closingSign;
   }
   document.title = current ? `${current.title} · ${SITE_TITLE}` : SITE_TITLE;
 }
