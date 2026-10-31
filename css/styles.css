@@ -232,10 +232,12 @@ img {
 }
 
 /* Chinese has no capitals to space out, and its denser characters need a
-   slightly larger size than the English labels */
+   slightly larger size than the English labels; and Chinese has no italic, so
+   italic text stays upright instead of a fake slant */
 :root:lang(zh) {
   --text-label: 0.9375rem;
   --tracking-label: 0.12em;
+  font-synthesis: none;
 }
 
 /* The 中文 / EN switch: a small filled pill with a globe, in a 44px tap target */
@@ -659,6 +661,7 @@ img {
 
 .about__story p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 .about__story p + p {
@@ -759,8 +762,11 @@ body[data-page="contents"] .page-bar {
   flex: none;
 }
 
-/* Scrolls sideways on narrow screens; the fading trailing edge hints at more */
+/* Scrolls sideways on narrow screens; an edge fades where names are hidden
+   (pages.js sets .is-scrolled / .is-at-end) */
 .page-bar__locations {
+  --fade-start: 0px;
+  --fade-end: 1.5rem;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -773,12 +779,34 @@ body[data-page="contents"] .page-bar {
   overflow-x: auto;
   scrollbar-width: none;
   white-space: nowrap;
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
-  mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
 }
 
 .page-bar__locations::-webkit-scrollbar {
   display: none;
+}
+
+.page-bar__locations.is-scrolled {
+  --fade-start: 1.5rem;
+}
+
+.page-bar__locations.is-at-end {
+  --fade-end: 0px;
+}
+
+/* Phones: the back link shrinks to "‹" (its aria-label still names it), so
+   more of the location list shows */
+@media (max-width: 30rem) {
+  .page-bar__back {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0 var(--space-xs);
+  }
+
+  .page-bar__back [data-lang] {
+    display: none;
+  }
 }
 
 @media (min-width: 64rem) {
@@ -871,6 +899,7 @@ body[data-page="contents"] .page-bar {
   font-weight: 400;
   font-size: clamp(2.25rem, 6vw, 3.5rem);
   line-height: 1.1;
+  text-wrap: balance;
 }
 
 /* The location's caption (the same line its card shows) */
@@ -881,6 +910,7 @@ body[data-page="contents"] .page-bar {
   font-size: 1.25rem;
   line-height: 1.3;
   color: var(--color-muted);
+  text-wrap: balance;
 }
 
 .chapter__meta {
@@ -913,6 +943,7 @@ body[data-page="contents"] .page-bar {
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-muted);
+  text-wrap: balance;
 }
 
 /* The last location's ending: the couple's closing note */
@@ -944,6 +975,14 @@ body[data-page="contents"] .page-bar {
   font-style: italic;
   font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
   line-height: 1.3;
+  text-wrap: balance;
+}
+
+/* Chinese breaks between any characters; keep the phrase whole so it breaks
+   at the comma (break-word still allows a break at very large text) */
+:root:lang(zh) .chapter__closing-line {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .chapter__closing-sign {
@@ -1299,6 +1338,7 @@ body[data-page="contents"] .page-bar {
   font-size: 1.0625rem;
   line-height: 1.3;
   color: var(--color-muted);
+  text-wrap: balance;
 }
 
 /* Album corners holding the print */

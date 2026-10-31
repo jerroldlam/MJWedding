@@ -14,6 +14,7 @@
  * Guest page changes cross-fade (a view transition around show(); the look is
  * in css/styles.css); first loads, reduced motion and older browsers swap instantly.
  * Labels follow the language (i18n.js) and are relabelled when the guest switches.
+ * The bar's location list fades only at the edges where names are hidden.
  */
 
 import { words, placeName, onLanguageChange } from "./i18n.js";
@@ -46,6 +47,18 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function rafThrottle(fn) {
+  let queued = false;
+  return () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      fn();
+    });
+  };
 }
 
 function setup(manifest) {
@@ -93,6 +106,8 @@ function setup(manifest) {
   dom.list = bar.querySelector(".page-bar__locations");
   dom.cover = document.querySelector(".cover");
   buildSwitcher();
+  dom.list.addEventListener("scroll", rafThrottle(updateFades), { passive: true });
+  window.addEventListener("resize", rafThrottle(updateFades));
   applyWords();
   onLanguageChange(applyWords);
   bar.hidden = false;
@@ -198,6 +213,8 @@ function applyWords() {
     if (sign) sign.textContent = w.closingSign;
   }
   document.title = current ? `${current.title} · ${SITE_TITLE}` : SITE_TITLE;
+  // The names change width with the language
+  if (dom.list) updateFades();
 }
 
 // Which page an address shows. Invalid routes and dead photo links are
@@ -358,6 +375,7 @@ function show(page, { scroll, focus }) {
     if (target && !target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
     target?.focus({ preventScroll: true });
   }
+  updateFades();
 }
 
 function prefersReducedMotion() {
@@ -372,6 +390,15 @@ function centreInRow(link) {
   const linkRect = link.getBoundingClientRect();
   const left = row.scrollLeft + (linkRect.left - rowRect.left) - (row.clientWidth - linkRect.width) / 2;
   row.scrollTo({ left, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}
+
+// Fades only the bar's edges that hide names: the start once scrolled, the
+// end until it's reached (styled in css/styles.css).
+function updateFades() {
+  const row = dom.list;
+  const max = row.scrollWidth - row.clientWidth;
+  row.classList.toggle("is-scrolled", row.scrollLeft > 1);
+  row.classList.toggle("is-at-end", row.scrollLeft >= max - 1);
 }
 
 // Tints the page for a location (null = untinted, e.g. the contents). The
