@@ -1333,6 +1333,30 @@ html.viewer-open {
   .viewer__frame.is-settling {
     transition: transform 250ms var(--ease-soft);
   }
+
+  /* Page changes cross-fade (pages.js wraps the swap in a view transition).
+     While fading, colours switch at once so the new page starts in its own
+     colour, and between two locations the bar holds still. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 450ms;
+    animation-timing-function: ease;
+  }
+
+  /* Taps during a fade reach the new page */
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  .page-fading body,
+  .page-fading .page-bar {
+    transition: none;
+  }
+
+  .bar-steady .page-bar {
+    view-transition-name: page-bar;
+  }
 }
 
 @keyframes cue-bob {

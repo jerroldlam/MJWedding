@@ -1,6 +1,6 @@
 /*
  * Pages: the photobook shows one page at a time, either the contents (cover,
- * About us, location cards) or a single location. Each location has its own
+ * Our story, location cards) or a single location. Each location has its own
  * address (see routes.js), a pinned bar ("‹ Contents" plus every location) and
  * an end panel that leads back to the contents or on to the next location.
  *
@@ -9,6 +9,9 @@
  * can go straight back without growing history. Each entry remembers its
  * scroll position. A direct visit to a location or photo gets a contents entry
  * underneath, so back always leads home. The viewer layers its own entry on top.
+ *
+ * Guest page changes cross-fade (a view transition around show(); the look is
+ * in css/styles.css); first loads, reduced motion and older browsers swap instantly.
  */
 
 import { parseHash } from "./routes.js";
@@ -17,10 +20,15 @@ const READY_EVENT = "photobook:gallery-ready";
 const THEMES = ["light", "dark"];
 const SITE_TITLE = "May & Jerrold";
 const SCROLL_SETTLE_MS = 300;
+// Classes on <html> while a page fade runs (styled in css/styles.css)
+const FADING_CLASS = "page-fading";
+const STEADY_BAR_CLASS = "bar-steady";
+const VIEWER_OPEN_CLASS = "viewer-open"; // set by viewer.js
 
 let pages = [];
 let byPath = new Map();
 let current = null; // null = the contents page
+let fade = null; // the latest page fade still running, if any
 const dom = {};
 
 export function init() {
@@ -205,7 +213,7 @@ function goTo(page) {
   const depth = current ? (history.state?.depth || 0) + 1 : 1;
   saveScroll();
   history.pushState({ page: "location", depth }, "", `#${page.route}`);
-  show(page, { scroll: "top", focus: true });
+  changePage(page, { scroll: "top", focus: true });
 }
 
 function backToContents() {
@@ -214,20 +222,55 @@ function backToContents() {
     history.go(-depth); // onPopState shows the contents and restores its scroll
   } else {
     history.replaceState({ page: "contents" }, "", contentsUrl());
-    show(null, { scroll: "cards", focus: true });
+    changePage(null, { scroll: "cards", focus: true });
   }
 }
 
 function onPopState() {
-  let { page, valid } = resolve(location.hash);
+  let { page, photoKey, valid } = resolve(location.hash);
   if (!valid) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
     page = null;
+    photoKey = undefined;
   }
   // Same page: a photo opening or closing (the viewer's business), or an anchor.
   if (page === current) return;
   const saved = history.state?.scroll;
-  show(page, { scroll: typeof saved === "number" ? saved : page ? "top" : "cards", focus: true });
+  const options = { scroll: typeof saved === "number" ? saved : page ? "top" : "cards", focus: true };
+  // The viewer moves its own photo: no fade into a photo address or out of an
+  // open viewer (this listener runs before the viewer's).
+  if (photoKey || document.documentElement.classList.contains(VIEWER_OPEN_CLASS)) show(page, options);
+  else changePage(page, options);
+}
+
+// A page change the guest made: the old page dissolves into the new one.
+// History is already updated; only the swap itself runs inside the fade.
+function changePage(page, options) {
+  if (!canFade()) {
+    show(page, options);
+    return;
+  }
+  const root = document.documentElement;
+  root.classList.add(FADING_CLASS);
+  // Between two locations the bar holds still; to or from the contents it fades with the page.
+  root.classList.toggle(STEADY_BAR_CLASS, Boolean(page && current));
+  // History has already moved, so the page being shown changes now too: a tap
+  // before the swap runs must see it (for depth and same-page checks).
+  current = page;
+  const transition = document.startViewTransition(() => show(page, options));
+  fade = transition;
+  // Skipped (a newer tap, a hidden tab): the swap still happens, without the fade.
+  transition.ready.catch(() => {});
+  const done = () => {
+    if (fade !== transition) return; // a newer fade owns the classes
+    fade = null;
+    root.classList.remove(FADING_CLASS, STEADY_BAR_CLASS);
+  };
+  transition.finished.then(done, done);
+}
+
+function canFade() {
+  return typeof document.startViewTransition === "function" && !prefersReducedMotion();
 }
 
 function show(page, { scroll, focus }) {
