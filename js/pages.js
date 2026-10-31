@@ -35,6 +35,7 @@ let pages = [];
 let byPath = new Map();
 let current = null; // null = the contents page
 let fade = null; // the latest page fade still running, if any
+let coverAtTop = true; // the cover overlaps the top of the screen (contents only)
 const dom = {};
 // The closing notes (end of the last location, foot of the contents): their
 // line and signature, labelled by applyWords().
@@ -116,6 +117,7 @@ function setup(manifest) {
   dom.bar = bar;
   dom.list = bar.querySelector(".page-bar__locations");
   dom.cover = document.querySelector(".cover");
+  watchCover();
   buildSwitcher();
   dom.list.addEventListener("scroll", rafThrottle(updateFades), { passive: true });
   window.addEventListener("resize", rafThrottle(updateFades));
@@ -446,7 +448,7 @@ function updateFades() {
 
 // Tints the page for a location (null = untinted, e.g. the contents). The
 // stylesheet's --location-theme picks light or dark text, falling back to the
-// shoot's theme; the browser bar colour follows the page background.
+// shoot's theme; the browser bar follows (updateBarColour).
 function applyTheme(shootTheme, location) {
   const body = document.body;
   if (location) body.dataset.location = location;
@@ -457,7 +459,34 @@ function applyTheme(shootTheme, location) {
   const theme = THEMES.includes(locationTheme) ? locationTheme : shootTheme;
   if (THEMES.includes(theme)) body.dataset.theme = theme;
 
+  updateBarColour();
+}
+
+// The browser bar follows the top of the screen: the cover's shaded top
+// edge while the cover is there, otherwise the page's background.
+function updateBarColour() {
   const meta = document.querySelector('meta[name="theme-color"]');
-  const background = styles.getPropertyValue("--color-bg").trim();
-  if (meta && background) meta.content = background;
+  if (!meta) return;
+  const onCover = !current && coverAtTop && dom.cover;
+  const colour = onCover
+    ? getComputedStyle(dom.cover).getPropertyValue("--cover-top").trim()
+    : getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
+  if (colour) meta.content = colour;
+}
+
+// Watches whether the cover overlaps the top 1% of the screen (hidden on
+// location pages, so false there). The bar changes only on the contents
+// with the viewer closed (the viewer keeps its own bar colour).
+function watchCover() {
+  if (!dom.cover || !("IntersectionObserver" in window)) return;
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      coverAtTop = entry.isIntersecting;
+      if (current || document.documentElement.classList.contains(VIEWER_OPEN_CLASS)) return;
+      updateBarColour();
+    },
+    { rootMargin: "0px 0px -99% 0px" },
+  );
+  observer.observe(dom.cover);
+  window.matchMedia("(orientation: portrait)").addEventListener("change", updateBarColour);
 }
