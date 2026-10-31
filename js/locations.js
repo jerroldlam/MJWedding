@@ -3,13 +3,19 @@
  * photos, its name, shoot and photo count) that opens that location's page
  * (pages.js handles the click). Each card wears its location page's colours:
  * it carries the same data-location and data-theme the page puts on <body>.
+ * Its words follow the language (i18n.js), relabelled when the guest switches.
  * Built from the manifest once the gallery is ready; hidden until then.
  */
+
+import { words, placeName, shootName, onLanguageChange } from "./i18n.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 // Two columns on phones, three on tablets, five in a row on wide screens.
 const CARD_SIZES = "(min-width: 87.5rem) 17rem, (min-width: 64rem) 19vw, (min-width: 40rem) 31vw, 47vw";
 const THEMES = ["light", "dark"];
+
+// What applyWords() labels: each card's name, count and spoken label.
+const cards = [];
 
 export function init() {
   document.addEventListener(READY_EVENT, (event) => buildMenu(event.detail.manifest), { once: true });
@@ -47,6 +53,8 @@ function buildMenu(manifest) {
     const theme = getComputedStyle(card).getPropertyValue("--location-theme").trim();
     if (THEMES.includes(theme)) card.dataset.theme = theme;
   }
+  applyWords();
+  onLanguageChange(applyWords);
   menu.hidden = false;
   // iOS Safari only applies :active (the press dip) when a touch listener exists.
   menu.addEventListener("touchstart", () => {}, { passive: true });
@@ -79,13 +87,27 @@ function createCard(shoot, chapter, section) {
   img.src = photo.src.sm.url;
   frame.append(img);
 
-  const photos = `${count} ${count === 1 ? "photo" : "photos"}`;
-  const meta = solo ? photos : `${shoot.title} · ${photos}`;
-  link.append(frame, el("span", "locations__name", chapter.title), el("span", "locations__meta", meta));
-  // The name and meta are separate blocks; spell out the pause for screen readers.
-  link.setAttribute("aria-label", `${chapter.title}, ${solo ? photos : `${shoot.title}, ${photos}`}`);
+  // The name, count and spoken label are filled in by applyWords().
+  const name = el("span", "locations__name");
+  const meta = el("span", "locations__meta");
+  link.append(frame, name, meta);
+  cards.push({ shoot, chapter, solo, count, link, name, meta });
 
   const item = el("li");
   item.append(link);
   return item;
+}
+
+// Labels in the current language; runs at build and on every language switch.
+function applyWords() {
+  const w = words();
+  for (const { shoot, chapter, solo, count, link, name, meta } of cards) {
+    const place = placeName(shoot.id, chapter.id, chapter.title);
+    const shootTitle = shootName(shoot.id, shoot.title);
+    const photos = w.photoCount(count);
+    name.textContent = place;
+    meta.textContent = solo ? photos : `${shootTitle} · ${photos}`;
+    // The name and meta are separate blocks; spell out the pause for screen readers.
+    link.setAttribute("aria-label", w.cardLabel(place, solo ? null : shootTitle, photos));
+  }
 }

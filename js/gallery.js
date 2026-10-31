@@ -6,6 +6,7 @@
  * pages, viewer). Which page is visible is up to pages.js.
  */
 
+import { words, placeName, shootName, onLanguageChange } from "./i18n.js";
 import { routeFor } from "./routes.js";
 import { classifyShape, composeRows } from "./spreads.js";
 
@@ -18,6 +19,10 @@ const SINGLE_CAP_VH = 80;
 const READY_EVENT = "photobook:gallery-ready";
 const SIZES = ["sm", "md", "lg"];
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+// What applyWords() labels: each location's heading, count and photo descriptions.
+const labelled = [];
+let emptyNote = null;
 
 export async function init() {
   const gallery = document.getElementById("gallery");
@@ -86,7 +91,23 @@ function el(tag, { className, text } = {}) {
 }
 
 function renderEmpty(gallery) {
-  gallery.replaceChildren(el("p", { className: "gallery__empty", text: "Photos coming soon" }));
+  emptyNote = el("p", { className: "gallery__empty" });
+  gallery.replaceChildren(emptyNote);
+  applyWords();
+  onLanguageChange(applyWords);
+}
+
+// Labels in the current language; runs at build and on every language switch.
+function applyWords() {
+  const w = words();
+  if (emptyNote) emptyNote.textContent = w.photosComingSoon;
+  for (const { shoot, chapter, solo, count, title, meta, images } of labelled) {
+    const place = placeName(shoot.id, chapter.id, chapter.title);
+    const photos = w.photoCount(count);
+    title.textContent = place;
+    meta.textContent = solo ? photos : `${shootName(shoot.id, shoot.title)} · ${photos}`;
+    for (const { img, photo, index } of images) img.alt = w.photoAlt(photo.alt, place, index + 1, count);
+  }
 }
 
 // One page section per location, each with its own heading block (the page's
@@ -105,31 +126,40 @@ function renderManifest(gallery, manifest) {
       section.setAttribute("aria-labelledby", `${section.id}-title`);
 
       const count = chapter.photos.length;
-      const photos = `${count} ${count === 1 ? "photo" : "photos"}`;
       const header = el("header", { className: "chapter__header" });
-      const title = el("h1", { className: "chapter__title", text: chapter.title });
+      // The heading, count and photo descriptions are filled in by applyWords().
+      const title = el("h1", { className: "chapter__title" });
       title.id = `${section.id}-title`;
       title.tabIndex = -1;
-      const meta = el("p", { className: "chapter__meta", text: solo ? photos : `${shoot.title} · ${photos}` });
+      const meta = el("p", { className: "chapter__meta" });
       const divider = el("span", { className: "chapter__divider" });
       divider.setAttribute("aria-hidden", "true");
       header.append(title, meta, divider);
 
       const spread = el("div", { className: "spread" });
       section.append(header, spread);
-      chapters.push({
-        spread,
-        tiles: chapter.photos.map((photo, index) => createTile(shoot, chapter, photo, index, count)),
+      const tiles = chapter.photos.map((photo, index) => createTile(shoot, chapter, photo, index));
+      chapters.push({ spread, tiles });
+      labelled.push({
+        shoot,
+        chapter,
+        solo,
+        count,
+        title,
+        meta,
+        images: tiles.map((tile, index) => ({ img: tile.img, photo: chapter.photos[index], index })),
       });
       return section;
     }),
   );
 
   gallery.replaceChildren(...sections);
+  applyWords();
+  onLanguageChange(applyWords);
   return chapters;
 }
 
-function createTile(shoot, chapter, photo, index, count) {
+function createTile(shoot, chapter, photo, index) {
   const figure = el("figure", { className: "tile" });
   figure.dataset.photo = `${shoot.id}/${chapter.id}/${photo.id}`;
   figure.style.setProperty("--ar", String(photo.width / photo.height));
@@ -138,8 +168,8 @@ function createTile(shoot, chapter, photo, index, count) {
   const img = new Image();
   img.addEventListener("load", () => img.classList.add("is-loaded"));
   img.addEventListener("error", () => img.classList.add("is-broken"));
-  // Position makes each description distinct for screen readers; the viewer reuses it.
-  img.alt = photo.alt ? `${photo.alt}, photo ${index + 1} of ${count}` : `Photo ${index + 1} of ${count}`;
+  // The description (set by applyWords) includes the position, so each is
+  // distinct for screen readers; the viewer reuses it.
   img.width = photo.width;
   img.height = photo.height;
   img.loading = "lazy";

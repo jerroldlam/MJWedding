@@ -1,5 +1,6 @@
 Copyright 2015 the Cormorant Project Authors (github.com/CatharsisFonts/Cormorant)
 Copyright 2020 The Jost Project Authors (https://github.com/indestructible-type)
+Copyright 2012 Google Inc. All Rights Reserved. (Noto Serif SC)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

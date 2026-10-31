@@ -12,8 +12,10 @@
  *
  * Guest page changes cross-fade (a view transition around show(); the look is
  * in css/styles.css); first loads, reduced motion and older browsers swap instantly.
+ * Labels follow the language (i18n.js) and are relabelled when the guest switches.
  */
 
+import { words, placeName, onLanguageChange } from "./i18n.js";
 import { parseHash } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -60,6 +62,7 @@ function setup(manifest) {
           theme: shoot.theme,
           sectionId: section.id,
           route: section.dataset.route,
+          chapterTitle: chapter.title, // English; title (set by applyWords) is in the current language
           title: chapter.title,
           section,
           heading: section.querySelector(".chapter__title"),
@@ -81,6 +84,8 @@ function setup(manifest) {
   dom.list = bar.querySelector(".page-bar__locations");
   dom.cover = document.querySelector(".cover");
   buildSwitcher();
+  applyWords();
+  onLanguageChange(applyWords);
   bar.hidden = false;
 
   document.addEventListener("click", onLinkClick);
@@ -112,7 +117,7 @@ function buildSwitcher() {
       sep.setAttribute("aria-hidden", "true");
       items.push(sep);
     }
-    const link = el("a", "page-bar__link", page.title);
+    const link = el("a", "page-bar__link");
     link.href = `#${page.route}`;
     link.dataset.pageLink = page.route;
     page.barLink = link;
@@ -127,20 +132,42 @@ function buildEndPanel(page) {
   const panel = el("div", "chapter__end");
   const divider = el("span", "chapter__divider");
   divider.setAttribute("aria-hidden", "true");
-  const home = el("a", "chapter__home", "Back to contents");
+  // The words are filled in by applyWords().
+  const home = el("a", "chapter__home");
   home.href = "./";
   home.dataset.pageLink = "contents";
-  panel.append(el("p", "chapter__end-label", `End of ${page.title}`), divider, home);
+  page.endLabel = el("p", "chapter__end-label");
+  page.homeLink = home;
+  panel.append(page.endLabel, divider, home);
 
   if (page.next) {
     const next = el("a", "chapter__next");
     next.href = `#${page.next.route}`;
     next.dataset.pageLink = page.next.route;
-    next.setAttribute("aria-label", `Next location: ${page.next.title}`);
-    next.append(el("span", "chapter__next-label", "Next location"), el("span", "chapter__next-title", `${page.next.title} ›`));
+    page.nextLink = next;
+    page.nextLabel = el("span", "chapter__next-label");
+    page.nextTitle = el("span", "chapter__next-title");
+    next.append(page.nextLabel, page.nextTitle);
     panel.append(next);
   }
   return panel;
+}
+
+// Labels in the current language; runs at setup and on every language switch.
+function applyWords() {
+  const w = words();
+  for (const page of pages) page.title = placeName(page.shootId, page.chapterId, page.chapterTitle);
+  for (const page of pages) {
+    page.barLink.textContent = page.title;
+    page.endLabel.textContent = w.endOf(page.title);
+    page.homeLink.textContent = w.backToContents;
+    if (page.next) {
+      page.nextLink.setAttribute("aria-label", w.nextLocationLabel(page.next.title));
+      page.nextLabel.textContent = w.nextLocation;
+      page.nextTitle.textContent = `${page.next.title} ›`;
+    }
+  }
+  document.title = current ? `${current.title} · ${SITE_TITLE}` : SITE_TITLE;
 }
 
 // Which page an address shows. Invalid routes and dead photo links are
