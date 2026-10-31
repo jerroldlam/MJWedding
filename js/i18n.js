@@ -60,14 +60,14 @@ const WORDS = {
     nextPhoto: "Next photo",
     // The closing note at the end of the last location
     closingLine: "Thank you for being part of our story.",
-    closingSign: "With love, May & Jerrold",
+    closingSign: "With love, Jerrold & May",
   },
   zh: {
     photoCount: (n) => `${n} 张照片`,
     cardLabel: (place, count) => `${place}，${count}`,
     viewPhotos: (count) => `查看 ${count}`,
     // Chinese sentences use the couple's Chinese names
-    photoAlt: (alt, place, index, total) => `育娴和钿宇在${place}，第 ${index} 张，共 ${total} 张`,
+    photoAlt: (alt, place, index, total) => `钿宇和育娴在${place}，第 ${index} 张，共 ${total} 张`,
     photosComingSoon: "照片即将上传",
     endOf: (place) => `${place} · 完`,
     backToContents: "返回目录",
@@ -78,7 +78,7 @@ const WORDS = {
     previousPhoto: "上一张",
     nextPhoto: "下一张",
     closingLine: "谢谢你们，成为我们故事的一部分。",
-    closingSign: "育娴 & 钿宇 敬上",
+    closingSign: "钿宇 & 育娴 敬上",
   },
 };
 
