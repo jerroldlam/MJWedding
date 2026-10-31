@@ -1,4 +1,4 @@
-# May & Jerrold — Pre-wedding Photobook
+# May & Jerrold — Wedding Photobook
 
 A static, single-page photobook of our pre-wedding shoots, hosted on GitHub Pages. It's designed for phones and desktops.
 
