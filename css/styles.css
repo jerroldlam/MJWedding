@@ -212,7 +212,7 @@ img {
   --tracking-label: 0.12em;
 }
 
-/* The 中文 / EN switch: a small pill in a 44px tap target */
+/* The 中文 / EN switch: a small filled pill with a globe, in a 44px tap target */
 .lang-switch {
   display: inline-flex;
   align-items: center;
@@ -232,11 +232,45 @@ img {
 }
 
 .lang-switch__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
   padding: 0.3em 0.85em;
   border: 1px solid currentColor;
   border-radius: 999px;
+  /* A soft fill, so it reads as a button rather than a tag */
+  background: color-mix(in srgb, currentColor 8%, transparent);
   letter-spacing: 0.08em;
   line-height: 1.2;
+}
+
+/* A thin-line globe, the usual sign for "language" (decorative) */
+.lang-switch__label::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  margin-left: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: var(--globe) center / contain no-repeat;
+  mask: var(--globe) center / contain no-repeat;
+  --globe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1'%3E%3Ccircle cx='8' cy='8' r='6.5'/%3E%3Cellipse cx='8' cy='8' rx='2.8' ry='6.5'/%3E%3Cpath d='M1.5 8h13M2.6 4.6h10.8M2.6 11.4h10.8'/%3E%3C/svg%3E");
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lang-switch:hover .lang-switch__label {
+    background: color-mix(in srgb, currentColor 16%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lang-switch__label {
+    transition: background-color 200ms var(--ease-soft), scale 160ms var(--ease-soft);
+  }
+
+  .lang-switch:active .lang-switch__label {
+    scale: 0.94;
+  }
 }
 
 /* The phone's own Chinese font, so English readers never download the subset */
@@ -447,6 +481,19 @@ img {
 /* Champagne is too faint on grass; a soft ivory keeps the frame visible */
 .cover:has(.cover__image) .cover__frame {
   border-color: rgba(250, 246, 239, 0.55);
+}
+
+/* Over the photo the switch is frosted ivory, deepening when pointed at */
+.cover:has(.cover__image) .lang-switch__label {
+  background: rgba(250, 246, 239, 0.16);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover:has(.cover__image) .lang-switch:hover .lang-switch__label {
+    background: rgba(250, 246, 239, 0.28);
+  }
 }
 
 .cover:has(.cover__image) .cover__content {
