@@ -61,8 +61,13 @@ function buildMenu(manifest) {
 }
 
 function createCard(shoot, chapter, section) {
-  // The first photo in the location's (fixed, shuffled) order represents it.
-  const photo = chapter.photos[0];
+  // The couple's favourite (cardPhoto, set in the photo script) represents the
+  // location; otherwise its first portrait photo, which fills the portrait frame
+  // uncropped, or else its first photo.
+  const photo =
+    chapter.photos.find((p) => p.id === chapter.cardPhoto) ??
+    chapter.photos.find((p) => p.height > p.width) ??
+    chapter.photos[0];
   const count = chapter.photos.length;
   const solo = shoot.chapters.length === 1;
 
