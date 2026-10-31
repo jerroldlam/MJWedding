@@ -58,6 +58,9 @@ const WORDS = {
     close: "Close",
     previousPhoto: "Previous photo",
     nextPhoto: "Next photo",
+    // The closing note at the end of the last location
+    closingLine: "Thank you for being part of our story.",
+    closingSign: "With love, May & Jerrold",
   },
   zh: {
     photoCount: (n) => `${n} 张照片`,
@@ -74,6 +77,8 @@ const WORDS = {
     close: "关闭",
     previousPhoto: "上一张",
     nextPhoto: "下一张",
+    closingLine: "谢谢你们，成为我们故事的一部分。",
+    closingSign: "育娴 & 钿宇 敬上",
   },
 };
 

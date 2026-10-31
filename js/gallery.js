@@ -6,7 +6,7 @@
  * pages, viewer). Which page is visible is up to pages.js.
  */
 
-import { words, placeName, onLanguageChange } from "./i18n.js";
+import { words, placeName, caption, onLanguageChange } from "./i18n.js";
 import { routeFor } from "./routes.js";
 import { classifyShape, composeRows } from "./spreads.js";
 
@@ -20,7 +20,7 @@ const READY_EVENT = "photobook:gallery-ready";
 const SIZES = ["sm", "md", "lg"];
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-// What applyWords() labels: each location's heading, count and photo descriptions.
+// What applyWords() labels: each location's heading, caption, count and photo descriptions.
 const labelled = [];
 let emptyNote = null;
 
@@ -101,10 +101,12 @@ function renderEmpty(gallery) {
 function applyWords() {
   const w = words();
   if (emptyNote) emptyNote.textContent = w.photosComingSoon;
-  for (const { shoot, chapter, count, title, meta, images } of labelled) {
+  for (const { shoot, chapter, count, title, captionEl, meta, images } of labelled) {
     const place = placeName(shoot.id, chapter.id, chapter.title);
     const photos = w.photoCount(count);
     title.textContent = place;
+    captionEl.textContent = caption(shoot.id, chapter.id);
+    captionEl.hidden = !captionEl.textContent;
     meta.textContent = photos;
     for (const { img, photo, index } of images) img.alt = w.photoAlt(photo.alt, place, index + 1, count);
   }
@@ -127,14 +129,15 @@ function renderManifest(gallery, manifest) {
 
       const count = chapter.photos.length;
       const header = el("header", { className: "chapter__header" });
-      // The heading, count and photo descriptions are filled in by applyWords().
+      // The heading, caption, count and photo descriptions are filled in by applyWords().
       const title = el("h1", { className: "chapter__title" });
       title.id = `${section.id}-title`;
       title.tabIndex = -1;
       const meta = el("p", { className: "chapter__meta" });
+      const captionEl = el("p", { className: "chapter__caption" });
       const divider = el("span", { className: "chapter__divider" });
       divider.setAttribute("aria-hidden", "true");
-      header.append(title, meta, divider);
+      header.append(title, captionEl, meta, divider);
 
       const spread = el("div", { className: "spread" });
       section.append(header, spread);
@@ -145,6 +148,7 @@ function renderManifest(gallery, manifest) {
         chapter,
         count,
         title,
+        captionEl,
         meta,
         images: tiles.map((tile, index) => ({ img: tile.img, photo: chapter.photos[index], index })),
       });
