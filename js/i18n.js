@@ -31,7 +31,7 @@ export function placeName(shootId, chapterId, title) {
 
 // A short line under each location's card name, written by the couple.
 const CAPTIONS = {
-  "outdoor/forest": { en: "among the tall trees", zh: "在高高的树林间" },
+  "outdoor/forest": { en: "among the tall trees", zh: "在参天的树林间" },
   "outdoor/flower-field": { en: "a field in bloom", zh: "花开满田" },
   "outdoor/open-field": { en: "golden hour in the long grass", zh: "长草间的金色时光" },
   "outdoor/beach": { en: "the last of the light", zh: "最后一抹余晖" },
@@ -77,7 +77,7 @@ const WORDS = {
     close: "关闭",
     previousPhoto: "上一张",
     nextPhoto: "下一张",
-    closingLine: "谢谢你们，成为我们故事的一部分。",
+    closingLine: "谢谢你们，陪我们写下这段故事。",
     closingSign: "钿宇 & 育娴 敬上",
   },
 };
