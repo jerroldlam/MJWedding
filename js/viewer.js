@@ -265,11 +265,12 @@ function show(index) {
   dom.frame.style.backgroundColor = photo.color || "transparent";
   // The tile's already-downloaded image stands in while the larger one loads.
   dom.frame.style.backgroundImage = tileImg?.currentSrc ? `url("${tileImg.currentSrc}")` : "none";
+  // Set first: the photo is fitted clear of this line
+  dom.position.textContent = `${placeName(entry.shootId, entry.chapterId, entry.title)} · ${entry.index} / ${entry.count}`;
   fitCurrent();
   dom.img.srcset = srcsetFor(photo);
   dom.img.src = photo.src.md.url;
 
-  dom.position.textContent = `${placeName(entry.shootId, entry.chapterId, entry.title)} · ${entry.index} / ${entry.count}`;
   dom.prev.disabled = index === entry.start;
   dom.next.disabled = index === entry.end;
 
@@ -283,6 +284,16 @@ function tileFor(key) {
 
 function tileImage(key) {
   return tileFor(key)?.querySelector("img");
+}
+
+// The position line can wrap at large text (on touch screens it sits
+// between the arrows); keep the photo clear of it by widening the stage's
+// bottom padding when the line is taller than the room the stylesheet leaves.
+function reserveRoomForPosition() {
+  dom.stage.style.paddingBottom = "";
+  const room = parseFloat(getComputedStyle(dom.stage).paddingBottom);
+  const needed = window.innerHeight - dom.position.getBoundingClientRect().top + 8;
+  if (needed > room) dom.stage.style.paddingBottom = `${Math.ceil(needed)}px`;
 }
 
 function availableBox() {
@@ -301,6 +312,7 @@ function fitSize(photo) {
 }
 
 function fitCurrent() {
+  reserveRoomForPosition();
   const size = fitSize(sequence[current].photo);
   dom.frame.style.width = `${size.width}px`;
   dom.frame.style.height = `${size.height}px`;

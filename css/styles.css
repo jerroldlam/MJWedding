@@ -1707,6 +1707,36 @@ html.viewer-open {
   pointer-events: none;
 }
 
+/* Touch screens: swiping moves between photos, so the arrows step off the
+   photo into a row below it, either side of the position line */
+@media (hover: none), (pointer: coarse) {
+  .viewer__stage {
+    padding-bottom: calc(max(0.25rem, env(safe-area-inset-bottom)) + 3.25rem);
+  }
+
+  .viewer__prev,
+  .viewer__next {
+    top: auto;
+    bottom: max(0.25rem, env(safe-area-inset-bottom));
+    transform: none;
+    height: 44px;
+    background: transparent;
+  }
+
+  /* The same 44px row; it wraps (balanced) at large text instead of running
+     under the arrows */
+  .viewer__position {
+    bottom: max(0.25rem, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding-inline: 52px;
+    letter-spacing: min(var(--tracking-label), 0.16em);
+    text-wrap: balance;
+  }
+}
+
 .site-footer {
   padding: var(--space-lg) var(--space-md) max(var(--space-lg), env(safe-area-inset-bottom));
   text-align: center;
