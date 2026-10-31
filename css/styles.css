@@ -62,6 +62,9 @@
   --slate: #1D1F24;
   --espresso: #231D19;
 
+  /* Paper grain tile (story 25/26): warm by default; locations set their own */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .18 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
   /* Fonts */
   --font-display: "Cormorant Garamond", "Cormorant", "Photobook Serif SC", Garamond, "Times New Roman", Georgia, serif;
   --font-ui: "Jost", "Photobook Serif SC", "Futura", "Century Gothic", "Helvetica Neue", Arial, sans-serif;
@@ -117,6 +120,12 @@
   --color-line: rgba(46, 43, 39, 0.12);
 }
 
+/* Small grey text on the light location pages, a shade deeper so it stays
+   at 4.5:1 or better over the grain (stone elsewhere) */
+body[data-page="location"][data-theme="light"] {
+  --color-muted: #5F5850;
+}
+
 [data-theme="dark"] {
   --color-bg: var(--ink);
   --color-text: var(--parchment);
@@ -132,16 +141,19 @@
 [data-location="outdoor-beach"] {
   --color-bg: var(--dusk);
   --location-theme: light;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .27 0 0 0 0 .29 0 0 0 0 .34 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 [data-location="outdoor-flower-field"] {
   --color-bg: var(--mist);
   --location-theme: light;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .27 0 0 0 0 .29 0 0 0 0 .34 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 [data-location="outdoor-forest"] {
   --color-bg: var(--slate);
   --location-theme: dark;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .98 0 0 0 0 .96 0 0 0 0 .94 0 0 0 .24 -.075'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 [data-location="outdoor-open-field"] {
@@ -152,6 +164,7 @@
 [data-location="studio"] {
   --color-bg: var(--espresso);
   --location-theme: dark;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .98 0 0 0 0 .96 0 0 0 0 .94 0 0 0 .24 -.075'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ==========================================================================
@@ -179,10 +192,10 @@ body {
   transition: background-color var(--dur-theme) var(--ease-soft), color var(--dur-theme) var(--ease-soft);
 }
 
-/* Faint warm paper grain behind the contents page, like heavy album paper
-   (never on location pages, which keep their flat colour) */
-body:not([data-page="location"]) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .18 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* Faint paper grain on every page, like heavy album paper; each location
+   sets its own tile (--grain) so its colour keeps its character */
+body {
+  background-image: var(--grain);
 }
 
 img {
@@ -721,6 +734,7 @@ body[data-page="contents"] .page-bar {
     0
     max(var(--space-sm), env(safe-area-inset-left));
   background: var(--color-bg);
+  background-image: var(--grain);
   border-bottom: 1px solid var(--color-line);
   transition: background-color var(--dur-theme) var(--ease-soft), border-color var(--dur-theme) var(--ease-soft);
 }
