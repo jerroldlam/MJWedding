@@ -21,7 +21,7 @@ import { parseHash } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
 const THEMES = ["light", "dark"];
-const SITE_TITLE = "May & Jerrold";
+const SITE_TITLE = "Jerrold & May";
 const SCROLL_SETTLE_MS = 300;
 // Classes on <html> while a page fade runs (styled in css/styles.css)
 const FADING_CLASS = "page-fading";
