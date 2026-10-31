@@ -459,6 +459,8 @@ img {
 /* The showing photo's dominant colour, so the names read before (or without) the photo */
 .cover:has(.cover__image) {
   background-color: #75633e;
+  /* The cover's shaded top edge, for the phone's browser bar (pages.js) */
+  --cover-top: #9C835B;
 }
 
 .cover:has(.cover__image)::after {
@@ -537,6 +539,7 @@ img {
 @media (orientation: portrait) {
   .cover:has(.cover__image) {
     background-color: #9f8e70;
+    --cover-top: #3B3128;
   }
 
   .cover:has(.cover__image)::after {
