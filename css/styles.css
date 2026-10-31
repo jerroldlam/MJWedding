@@ -1111,10 +1111,13 @@ body[data-page="contents"] .page-bar {
 }
 
 .locations__photo {
+  position: relative;
   display: block;
   margin-bottom: var(--space-sm);
   aspect-ratio: 3 / 4;
   overflow: hidden;
+  /* A faint shadow, so the photo reads as a print mounted on the mat */
+  box-shadow: 0 1px 4px rgba(24, 14, 6, 0.18);
 }
 
 .locations__photo img {
@@ -1139,6 +1142,72 @@ body[data-page="contents"] .page-bar {
   color: var(--color-muted);
 }
 
+/* A chapter numeral above the name (decorative) */
+.locations__number {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.125rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-strong);
+}
+
+.locations__card[data-theme="dark"] .locations__number {
+  color: var(--champagne);
+}
+
+/* The couple's short line under the name */
+.locations__caption {
+  margin-bottom: 0.25rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--color-muted);
+}
+
+/* Album corners holding the print */
+.locations__corners {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  --corner: #C9AE85;
+  --corner-size: clamp(14px, 2.4vw, 20px);
+  background:
+    linear-gradient(135deg, var(--corner) 50%, transparent 50%) top left / var(--corner-size) var(--corner-size) no-repeat,
+    linear-gradient(225deg, var(--corner) 50%, transparent 50%) top right / var(--corner-size) var(--corner-size) no-repeat,
+    linear-gradient(45deg, var(--corner) 50%, transparent 50%) bottom left / var(--corner-size) var(--corner-size) no-repeat,
+    linear-gradient(315deg, var(--corner) 50%, transparent 50%) bottom right / var(--corner-size) var(--corner-size) no-repeat;
+  filter: drop-shadow(0 1px 1.5px rgba(24, 14, 6, 0.35));
+}
+
+/* A light line inside the print, echoing the cover's frame: drawn in when
+   pointed at or focused, and shown faintly on touch screens */
+.locations__line {
+  position: absolute;
+  inset: 0.5rem;
+  z-index: 1;
+  pointer-events: none;
+  --line: rgba(250, 246, 239, 0.85);
+  background:
+    linear-gradient(var(--line), var(--line)) top left / 0 1px no-repeat,
+    linear-gradient(var(--line), var(--line)) top right / 1px 0 no-repeat,
+    linear-gradient(var(--line), var(--line)) bottom right / 0 1px no-repeat,
+    linear-gradient(var(--line), var(--line)) bottom left / 1px 0 no-repeat;
+}
+
+.locations__card:focus-visible .locations__line {
+  background-size: 100% 1px, 1px 100%, 100% 1px, 1px 100%;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .locations__line {
+    background-size: 100% 1px, 1px 100%, 100% 1px, 1px 100%;
+    opacity: 0.7;
+  }
+}
+
 /* Same hints as the photos: underline and slow zoom on hover, a dip on press */
 @media (hover: hover) and (pointer: fine) {
   .locations__card:hover .locations__name {
@@ -1147,11 +1216,19 @@ body[data-page="contents"] .page-bar {
     text-decoration-thickness: 1px;
     text-underline-offset: 0.3em;
   }
+
+  .locations__card:hover .locations__line {
+    background-size: 100% 1px, 1px 100%, 100% 1px, 1px 100%;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .locations__photo {
     transition: transform 160ms var(--ease-soft), filter 160ms var(--ease-soft);
+  }
+
+  .locations__line {
+    transition: background-size 900ms var(--ease-soft);
   }
 
   .locations__card:active .locations__photo {

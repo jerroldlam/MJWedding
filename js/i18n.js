@@ -29,6 +29,19 @@ export function placeName(shootId, chapterId, title) {
   return lang() === "zh" ? PLACES_ZH[`${shootId}/${chapterId}`] ?? title : title;
 }
 
+// A short line under each location's card name, written by the couple.
+const CAPTIONS = {
+  "outdoor/forest": { en: "among the tall trees", zh: "在高高的树林间" },
+  "outdoor/flower-field": { en: "a field in bloom", zh: "花开满田" },
+  "outdoor/open-field": { en: "golden hour in the long grass", zh: "长草间的金色时光" },
+  "outdoor/beach": { en: "the last of the light", zh: "最后一抹余晖" },
+  "studio/studio": { en: "just the two of us", zh: "只有我们俩" },
+};
+
+export function caption(shootId, chapterId) {
+  return CAPTIONS[`${shootId}/${chapterId}`]?.[lang()] ?? "";
+}
+
 // cardLabel's count is the already-formatted photoCount.
 const WORDS = {
   en: {
