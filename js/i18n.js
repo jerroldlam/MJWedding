@@ -42,11 +42,12 @@ export function caption(shootId, chapterId) {
   return CAPTIONS[`${shootId}/${chapterId}`]?.[lang()] ?? "";
 }
 
-// cardLabel's count is the already-formatted photoCount.
+// cardLabel's and viewPhotos' count is the already-formatted photoCount.
 const WORDS = {
   en: {
     photoCount: (n) => `${n} ${n === 1 ? "photo" : "photos"}`,
     cardLabel: (place, count) => `${place}, ${count}`,
+    viewPhotos: (count) => `View ${count}`,
     photoAlt: (alt, place, index, total) => (alt ? `${alt}, photo ${index} of ${total}` : `Photo ${index} of ${total}`),
     photosComingSoon: "Photos coming soon",
     endOf: (place) => `End of ${place}`,
@@ -61,6 +62,7 @@ const WORDS = {
   zh: {
     photoCount: (n) => `${n} 张照片`,
     cardLabel: (place, count) => `${place}，${count}`,
+    viewPhotos: (count) => `查看 ${count}`,
     // Chinese sentences use the couple's Chinese names
     photoAlt: (alt, place, index, total) => `育娴和钿宇在${place}，第 ${index} 张，共 ${total} 张`,
     photosComingSoon: "照片即将上传",
