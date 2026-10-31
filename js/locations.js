@@ -19,6 +19,22 @@ const THEMES = ["light", "dark"];
 // Chapter numerals above the card names, in card order
 const NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
+// The couple's favourite (cardPhoto, set in the photo script) represents a
+// location; otherwise its first portrait photo, which fills a portrait frame
+// uncropped, or else its first photo. The end panel's next card uses it too.
+export function cardPhoto(chapter) {
+  return (
+    chapter.photos.find((p) => p.id === chapter.cardPhoto) ??
+    chapter.photos.find((p) => p.height > p.width) ??
+    chapter.photos[0]
+  );
+}
+
+// The chapter numeral for a location's position in the book (decorative)
+export function numeral(position) {
+  return NUMERALS[position] ?? "";
+}
+
 // What applyWords() labels: each card's name, caption, count and spoken label.
 const cards = [];
 
@@ -67,13 +83,7 @@ function buildMenu(manifest) {
 }
 
 function createCard(shoot, chapter, section, position) {
-  // The couple's favourite (cardPhoto, set in the photo script) represents the
-  // location; otherwise its first portrait photo, which fills the portrait frame
-  // uncropped, or else its first photo.
-  const photo =
-    chapter.photos.find((p) => p.id === chapter.cardPhoto) ??
-    chapter.photos.find((p) => p.height > p.width) ??
-    chapter.photos[0];
+  const photo = cardPhoto(chapter);
   const count = chapter.photos.length;
 
   const link = el("a", "locations__card");
@@ -105,7 +115,7 @@ function createCard(shoot, chapter, section, position) {
 
   // A chapter numeral (decorative); the name, caption, count and spoken label
   // are filled in by applyWords().
-  const number = el("span", "locations__number", NUMERALS[position] ?? "");
+  const number = el("span", "locations__number", numeral(position));
   number.setAttribute("aria-hidden", "true");
   const name = el("span", "locations__name");
   const captionEl = el("span", "locations__caption");
