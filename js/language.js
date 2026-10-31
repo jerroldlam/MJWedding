@@ -56,7 +56,11 @@
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    for (const button of document.querySelectorAll("[data-lang-switch]")) button.hidden = false;
+    for (const button of document.querySelectorAll("[data-lang-switch]")) {
+      button.hidden = false;
+      // iOS Safari only applies :active (the press dip) when a touch listener exists.
+      button.addEventListener("touchstart", () => {}, { passive: true });
+    }
     applyLabels();
   });
 })();
