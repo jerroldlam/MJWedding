@@ -168,7 +168,7 @@ function buildInvite() {
   dom.inviteCaption = el("span", "quiz-invite__caption");
   dom.inviteCta = el("span", "quiz-invite__cta");
   text.append(dom.inviteLabel, dom.inviteTitle, dom.inviteCaption, dom.inviteCta);
-  invite.append(fan("2.75rem"), text);
+  invite.append(fan("3.5rem"), text);
   dom.invite = invite;
   return invite;
 }

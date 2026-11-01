@@ -62,7 +62,7 @@ const WORDS = {
     closingLine: "Thank you for being part of our story.",
     closingSign: "With love, Jerrold & May",
     // The quiz (quiz.js); its questions and results are in quiz-content.js
-    quizInviteLabel: "Not sure where to start?",
+    quizInviteLabel: "Can’t decide?",
     quizTitle: "Which of our locations are you?",
     quizInviteCaption: "seven questions to find the one that’s most you",
     quizInviteCta: "Take the quiz",
@@ -97,7 +97,7 @@ const WORDS = {
     nextPhoto: "下一张",
     closingLine: "谢谢你们，陪我们写下这段故事。",
     closingSign: "钿宇 & 育娴 敬上",
-    quizInviteLabel: "不知从哪里看起？",
+    quizInviteLabel: "还没决定？",
     quizTitle: "你最像我们的哪一个地点？",
     quizInviteCaption: "七个问题，找到最像你的那一个",
     quizInviteCta: "来测一测",
