@@ -16,10 +16,13 @@
  * in css/styles.css); first loads, reduced motion and older browsers swap instantly.
  * Labels follow the language (i18n.js) and are relabelled when the guest switches.
  * The bar's location list fades only at the edges where names are hidden.
+ * The quiz is a third kind of page ("#/quiz", "#/quiz/<slug>"), shown with
+ * the bar; its steps and result are quiz.js's.
  */
 
 import { words, placeName, caption, onLanguageChange } from "./i18n.js";
 import { cardPhoto, numeral } from "./locations.js";
+import { QUIZ_PATH, isQuizPath, quizPage, showQuiz } from "./quiz.js";
 import { parseHash } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -34,9 +37,12 @@ const VIEWER_OPEN_CLASS = "viewer-open"; // set by viewer.js
 let pages = [];
 let byPath = new Map();
 let current = null; // null = the contents page
+let quiz = null; // the quiz page (quiz.js), if it was built
 let fade = null; // the latest page fade still running, if any
 let coverAtTop = true; // the cover overlaps the top of the screen (contents only)
 const dom = {};
+// The quiz tints the page for its result's location (null = untinted)
+const tintForQuiz = (location) => applyTheme("light", location);
 // The closing notes (end of the last location, foot of the contents): their
 // line and signature, labelled by applyWords().
 const closings = [];
@@ -99,6 +105,8 @@ function setup(manifest) {
     page.next = pages[index + 1] || null;
   });
   byPath = new Map(pages.map((page) => [page.route, page]));
+  quiz = quizPage();
+  if (quiz) byPath.set(QUIZ_PATH, quiz);
   history.scrollRestoration = "manual";
 
   pages.forEach((page) => page.section.append(buildEndPanel(page)));
@@ -257,6 +265,7 @@ function applyWords() {
     line.textContent = w.closingLine;
     if (sign) sign.textContent = w.closingSign;
   }
+  if (quiz) quiz.title = w.quizPageTitle;
   document.title = current ? `${current.title} · ${SITE_TITLE}` : SITE_TITLE;
   // The names change width with the language
   if (dom.list) updateFades();
@@ -268,6 +277,7 @@ function resolve(hash) {
   const route = parseHash(hash);
   if (route.kind === "invalid") return { page: null, valid: false };
   if (route.kind === "location") {
+    if (quiz && isQuizPath(route.path)) return { page: quiz, quizPath: route.path, valid: true };
     const page = byPath.get(route.path);
     return page ? { page, valid: true } : { page: null, valid: false };
   }
@@ -285,21 +295,26 @@ function contentsUrl() {
 }
 
 function initialRoute() {
-  const { page, photoKey, valid } = resolve(location.hash);
+  const { page, photoKey, quizPath, valid } = resolve(location.hash);
   if (!valid) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
     show(null, { scroll: "top", focus: false });
   } else if (history.state?.page || history.state?.viewer) {
     // A reload or restored tab: the entries beneath are already there.
     const saved = history.state.scroll;
-    show(page, { scroll: typeof saved === "number" ? saved : page ? "top" : "none", focus: false });
+    show(page, {
+      scroll: typeof saved === "number" ? saved : page ? "top" : "none",
+      focus: false,
+      quizPath,
+      quizOwn: history.state.quizOwn,
+    });
   } else if (page) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
-    history.pushState({ page: "location", depth: 1 }, "", `#${page.route}`);
+    history.pushState({ page: page === quiz ? "quiz" : "location", depth: 1 }, "", `#${quizPath ?? page.route}`);
     if (photoKey) history.pushState({ viewer: true }, "", `#photo/${photoKey}`);
     // No focus on arrival: the page starts at the heading, and focusing it
     // would draw a focus box before the guest has done anything.
-    show(page, { scroll: "top", focus: false });
+    show(page, { scroll: "top", focus: false, quizPath });
   } else {
     // A plain contents load; the browser handles any "#about"-style anchor.
     // Marking the entry as ours lets a reload return to the saved place.
@@ -331,8 +346,8 @@ function goTo(page) {
   }
   const depth = current ? (history.state?.depth || 0) + 1 : 1;
   saveScroll();
-  history.pushState({ page: "location", depth }, "", `#${page.route}`);
-  changePage(page, { scroll: "top", focus: true });
+  history.pushState({ page: page === quiz ? "quiz" : "location", depth }, "", `#${page.route}`);
+  changePage(page, { scroll: "top", focus: true, quizPath: page.route });
 }
 
 function backToContents() {
@@ -346,16 +361,27 @@ function backToContents() {
 }
 
 function onPopState() {
-  let { page, photoKey, valid } = resolve(location.hash);
+  let { page, photoKey, quizPath, valid } = resolve(location.hash);
   if (!valid) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
     page = null;
     photoKey = undefined;
   }
+  // The quiz already showing, with an edited address (e.g. "#/quiz/beach"):
+  // the quiz shows what it names.
+  if (page && page === current && page === quiz) {
+    showQuiz(quizPath, Boolean(history.state?.quizOwn), tintForQuiz);
+    return;
+  }
   // Same page: a photo opening or closing (the viewer's business), or an anchor.
   if (page === current) return;
   const saved = history.state?.scroll;
-  const options = { scroll: typeof saved === "number" ? saved : page ? "top" : "cards", focus: true };
+  const options = {
+    scroll: typeof saved === "number" ? saved : page ? "top" : "cards",
+    focus: true,
+    quizPath,
+    quizOwn: history.state?.quizOwn,
+  };
   // The viewer moves its own photo: no fade into a photo address or out of an
   // open viewer (this listener runs before the viewer's).
   if (photoKey || document.documentElement.classList.contains(VIEWER_OPEN_CLASS)) show(page, options);
@@ -392,22 +418,25 @@ function canFade() {
   return typeof document.startViewTransition === "function" && !prefersReducedMotion();
 }
 
-function show(page, { scroll, focus }) {
+function show(page, { scroll, focus, quizPath, quizOwn }) {
   // Leaving the contents ends the cover's entrance for this visit, so coming
   // back shows the cover complete instead of replaying it.
   if (page && document.body.dataset.page === "contents") dom.cover?.classList.add("is-entered");
   current = page;
-  document.body.dataset.page = page ? "location" : "contents";
+  document.body.dataset.page = !page ? "contents" : page === quiz ? "quiz" : "location";
   for (const p of pages) {
     p.section.hidden = p !== page;
     p.barLink.classList.toggle("is-active", p === page);
     if (p === page) p.barLink.setAttribute("aria-current", "page");
     else p.barLink.removeAttribute("aria-current");
   }
+  if (quiz) quiz.section.hidden = page !== quiz;
   dom.bar.hidden = !page;
-  if (page) centreInRow(page.barLink);
+  if (page?.barLink) centreInRow(page.barLink);
 
-  applyTheme(page ? page.theme : "light", page ? page.sectionId : null);
+  // The quiz tints the page itself: its result wears the location's colours
+  if (page === quiz) showQuiz(quizPath ?? QUIZ_PATH, Boolean(quizOwn), tintForQuiz);
+  else applyTheme(page ? page.theme : "light", page ? page.sectionId : null);
   document.title = page ? `${page.title} · ${SITE_TITLE}` : SITE_TITLE;
 
   // Location pages start at the top: the bar, then the location's heading.
