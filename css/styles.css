@@ -169,6 +169,13 @@ body[data-page="quiz"][data-theme="light"] {
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .98 0 0 0 0 .96 0 0 0 0 .94 0 0 0 .24 -.075'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* The quiz's start and questions: linen, the colour of its invite card, so
+   the card opens into its page as the location cards do (a result wears its
+   location's colours instead) */
+body[data-page="quiz"]:not([data-location]) {
+  --color-bg: var(--linen);
+}
+
 /* ==========================================================================
    Base
    ========================================================================== */
@@ -1674,13 +1681,15 @@ body:not([data-page="quiz"]) .quiz {
 }
 
 .quiz-fan__print + .quiz-fan__print {
-  margin-left: calc(var(--print) * -0.45);
+  margin-left: calc(var(--print) * -0.38);
 }
 
-.quiz-fan__print:nth-child(1) { rotate: -10deg; translate: 0 calc(var(--print) * 0.12); }
-.quiz-fan__print:nth-child(2) { rotate: -5deg; translate: 0 calc(var(--print) * 0.04); }
-.quiz-fan__print:nth-child(4) { rotate: 5deg; translate: 0 calc(var(--print) * 0.04); }
-.quiz-fan__print:nth-child(5) { rotate: 10deg; translate: 0 calc(var(--print) * 0.12); }
+/* Held like a hand of cards: the middle print on top, the outer ones tucked under */
+.quiz-fan__print:nth-child(1) { z-index: 1; rotate: -10deg; translate: 0 calc(var(--print) * 0.12); }
+.quiz-fan__print:nth-child(2) { z-index: 2; rotate: -5deg; translate: 0 calc(var(--print) * 0.04); }
+.quiz-fan__print:nth-child(3) { z-index: 3; }
+.quiz-fan__print:nth-child(4) { z-index: 2; rotate: 5deg; translate: 0 calc(var(--print) * 0.04); }
+.quiz-fan__print:nth-child(5) { z-index: 1; rotate: 10deg; translate: 0 calc(var(--print) * 0.12); }
 
 .quiz-fan__print img {
   width: 100%;
@@ -1871,7 +1880,8 @@ body:not([data-page="quiz"]) .quiz {
   min-height: 3.25rem;
   padding: 0.75rem 1.125rem;
   border: 0;
-  background: var(--color-bg);
+  /* Ivory mats on the linen page */
+  background: var(--ivory);
   color: var(--color-text);
   font-family: var(--font-display);
   font-size: 1.25rem;
@@ -1886,7 +1896,7 @@ body:not([data-page="quiz"]) .quiz {
 }
 
 .quiz__answer[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--champagne) 16%, var(--color-bg));
+  background: color-mix(in srgb, var(--champagne) 24%, var(--ivory));
   box-shadow: inset 0 0 0 1px var(--color-accent-strong), 0 1px 2px rgba(24, 14, 6, 0.06);
 }
 
@@ -2037,8 +2047,10 @@ body[data-theme="dark"] .quiz__number {
 /* Chinese breaks between any characters; lines with commas keep their
    phrases whole so they break at the commas, as the closing note does
    (anywhere: a phrase too long for the screen at large text still breaks
-   inside it). Titles, questions and answers keep the normal breaking, which
-   never starts a line with punctuation. */
+   inside it); so do the questions, whose comma-less ones fit on a line. The
+   invite title and the answers keep the normal breaking, which never starts
+   a line with punctuation. */
+:root:lang(zh) .quiz__question,
 :root:lang(zh) .quiz__intro,
 :root:lang(zh) .quiz__tagline,
 :root:lang(zh) .quiz-invite__caption {

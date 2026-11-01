@@ -9,7 +9,7 @@
 export const QUESTIONS = [
   {
     en: "A free Saturday morning. You’re…",
-    zh: "难得空闲的星期六早上，你会……",
+    zh: "周六早上有空，你会……",
     answers: {
       "outdoor/forest": { en: "walking MacRitchie before it gets hot", zh: "趁天还没热，去麦里芝走一走" },
       "outdoor/flower-field": { en: "at a pretty café, photographing your latte", zh: "在漂亮的咖啡馆里，给拿铁拍照" },
