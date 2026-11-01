@@ -10,11 +10,13 @@
 import { init as initGallery } from "./gallery.js";
 import { init as initLocations } from "./locations.js";
 import { init as initPages } from "./pages.js";
+import { init as initQuiz } from "./quiz.js";
 import { init as initViewer } from "./viewer.js";
 
 const features = [
   { name: "gallery", init: initGallery },
   { name: "locations", init: initLocations },
+  { name: "quiz", init: initQuiz },
   { name: "pages", init: initPages },
   { name: "viewer", init: initViewer },
 ];
