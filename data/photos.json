@@ -3393,30 +3393,6 @@
               }
             },
             {
-              "id": "fsc01280",
-              "width": 3072,
-              "height": 4608,
-              "alt": "Jerrold & May at the beach",
-              "color": "#596371",
-              "src": {
-                "sm": {
-                  "url": "images/outdoor/beach/sm/fsc01280.webp",
-                  "width": 427,
-                  "height": 640
-                },
-                "md": {
-                  "url": "images/outdoor/beach/md/fsc01280.webp",
-                  "width": 853,
-                  "height": 1280
-                },
-                "lg": {
-                  "url": "images/outdoor/beach/lg/fsc01280.webp",
-                  "width": 1600,
-                  "height": 2400
-                }
-              }
-            },
-            {
               "id": "as200769",
               "width": 3072,
               "height": 4608,
@@ -3633,30 +3609,6 @@
               }
             },
             {
-              "id": "fsc01256",
-              "width": 3072,
-              "height": 4608,
-              "alt": "Jerrold & May at the beach",
-              "color": "#545f6d",
-              "src": {
-                "sm": {
-                  "url": "images/outdoor/beach/sm/fsc01256.webp",
-                  "width": 427,
-                  "height": 640
-                },
-                "md": {
-                  "url": "images/outdoor/beach/md/fsc01256.webp",
-                  "width": 853,
-                  "height": 1280
-                },
-                "lg": {
-                  "url": "images/outdoor/beach/lg/fsc01256.webp",
-                  "width": 1600,
-                  "height": 2400
-                }
-              }
-            },
-            {
               "id": "fsc01238",
               "width": 3072,
               "height": 4608,
@@ -3725,30 +3677,6 @@
                   "url": "images/outdoor/beach/lg/as200838.webp",
                   "width": 2400,
                   "height": 1600
-                }
-              }
-            },
-            {
-              "id": "as200801",
-              "width": 3072,
-              "height": 4608,
-              "alt": "Jerrold & May at the beach",
-              "color": "#585f67",
-              "src": {
-                "sm": {
-                  "url": "images/outdoor/beach/sm/as200801.webp",
-                  "width": 427,
-                  "height": 640
-                },
-                "md": {
-                  "url": "images/outdoor/beach/md/as200801.webp",
-                  "width": 853,
-                  "height": 1280
-                },
-                "lg": {
-                  "url": "images/outdoor/beach/lg/as200801.webp",
-                  "width": 1600,
-                  "height": 2400
                 }
               }
             },
