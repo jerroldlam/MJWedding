@@ -997,10 +997,11 @@ body:not([data-page="quiz"]) .quiz {
 }
 
 /* Chinese breaks between any characters; keep the phrase whole so it breaks
-   at the comma (break-word still allows a break at very large text) */
+   at the comma (anywhere still breaks a phrase too long for the screen at
+   very large text; break-word did too, but the page still widened to fit it) */
 :root:lang(zh) .chapter__closing-line {
   word-break: keep-all;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .chapter__closing-sign {
