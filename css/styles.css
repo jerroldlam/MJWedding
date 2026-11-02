@@ -2441,6 +2441,23 @@ body[data-theme="dark"] .quiz__number {
   text-wrap: balance;
 }
 
+/* The band's line in the couple's voice, under its title */
+.who__band-line {
+  max-width: 30rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.45;
+  color: var(--color-muted);
+  text-wrap: balance;
+}
+
+/* Breaks at its commas, like the quiz's other Chinese lines */
+:root:lang(zh) .who__band-line {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 .quiz--who .quiz__actions {
   margin-top: var(--space-sm);
 }

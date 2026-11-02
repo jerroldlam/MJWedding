@@ -29,10 +29,50 @@ export const QUESTIONS = [
   { en: "send a meme instead of replying properly?", zh: "不好好回信息，只丢一个表情包？", answer: "jerrold" },
 ];
 
-// The score's title; every score from 0 to 10 is in exactly one band
+// The score's title and a line under it in the couple's voice; every score
+// from 0 to 10 is in exactly one band (5 alone: one name all the way through
+// always scores exactly 5)
 export const BANDS = [
-  { min: 0, max: 3, en: "Did we meet at the wedding?", zh: "我们是在婚礼上才认识的吗？" },
-  { min: 4, max: 6, en: "Getting there", zh: "还差一点点" },
-  { min: 7, max: 8, en: "You know us well", zh: "你很懂我们" },
-  { min: 9, max: 10, en: "Practically family", zh: "简直是一家人" },
+  {
+    min: 0,
+    max: 2,
+    en: "Nice to meet you!",
+    zh: "幸会幸会！",
+    line: { en: "Come say hi, we’ll catch you up.", zh: "来打个招呼吧，我们慢慢讲给你听。" },
+  },
+  {
+    min: 3,
+    max: 4,
+    en: "So many stories to tell",
+    zh: "还有好多故事没讲",
+    line: { en: "Sit with us a while. We’ve got plenty.", zh: "来坐坐吧，我们有说不完的故事。" },
+  },
+  {
+    min: 5,
+    max: 5,
+    en: "Coin flip?",
+    zh: "抛硬币吗？",
+    line: { en: "Exactly half. Did you tap the same name every time?", zh: "刚好一半。你是不是每题都点同一个人？" },
+  },
+  {
+    min: 6,
+    max: 7,
+    en: "Kopi kaki",
+    zh: "咖啡好友",
+    line: { en: "You know us over coffee. Ask us for the rest.", zh: "一起喝过咖啡，剩下的故事下次说。" },
+  },
+  {
+    min: 8,
+    max: 9,
+    en: "Inner circle",
+    zh: "自己人",
+    line: { en: "You’ve clearly sat through our stories, more than once.", zh: "我们的故事，你显然听过不止一次。" },
+  },
+  {
+    min: 10,
+    max: 10,
+    en: "Were you in our group chat?",
+    zh: "你是不是在我们的群组里？",
+    line: { en: "A perfect score. Either you know us too well, or someone told you.", zh: "满分！要么你太懂我们，要么有人泄题了。" },
+  },
 ];

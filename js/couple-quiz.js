@@ -229,6 +229,7 @@ function buildSection() {
   dom.scoreSpoken = el("span", "visually-hidden");
   dom.heading.append(dom.label, score, dom.scoreSpoken);
   dom.band = el("p", "who__band");
+  dom.bandLine = el("p", "who__band-line");
   const actions = el("div", "quiz__actions");
   dom.share = el("button", "quiz__button");
   dom.retake = el("button", "quiz__quiet");
@@ -243,7 +244,7 @@ function buildSection() {
   actions.append(dom.share, dom.retake, dom.takeIt, dom.home);
   dom.status = el("p", "quiz__status");
   dom.status.setAttribute("role", "status");
-  end.append(dom.heading, dom.band, actions, dom.status);
+  end.append(dom.heading, dom.band, dom.bandLine, actions, dom.status);
 
   dom.steps = { start, question: ask, result: end };
   for (const step of [ask, end]) step.hidden = true;
@@ -403,7 +404,9 @@ function render() {
     dom.scoreN.textContent = String(result.score);
     dom.scoreOf.textContent = `/ ${QUESTIONS.length}`;
     dom.scoreSpoken.textContent = ` ${w.whoScoreSpoken(result.score, QUESTIONS.length)}`;
-    dom.band.textContent = band(result.score)[language];
+    const { line, ...title } = band(result.score);
+    dom.band.textContent = title[language];
+    dom.bandLine.textContent = line[language];
   }
 }
 
