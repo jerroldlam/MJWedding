@@ -2145,18 +2145,51 @@ body[data-theme="dark"] .quiz__number {
    linen with its steps, buttons and progress line
    ========================================================================== */
 
-/* "J or M": the invite's (and the start's) decoration, echoing the monogram */
+/* "Jerrold or May": their portraits as two prints (the fan's look) with "or"
+   between; the invite's and the start's decoration */
 .who-mark {
+  --print: min(3.5rem, 16vw);
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 0.3em;
+  gap: 0.45rem;
   padding: 0.2rem 0.6rem;
   font-family: var(--font-display);
   line-height: 1;
   color: var(--color-text);
 }
 
+.who-mark__print {
+  flex: none;
+  width: var(--print);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 2px solid var(--ivory);
+  box-shadow: 0 1px 4px rgba(24, 14, 6, 0.22);
+}
+
+.who-mark__print:first-child {
+  rotate: -6deg;
+}
+
+.who-mark__print:last-child {
+  rotate: 6deg;
+}
+
+/* Cropped around the face, as on the choices */
+.who-mark__print img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  opacity: 0;
+}
+
+.who-mark__print img.is-loaded {
+  opacity: 1;
+}
+
+/* The fallback when a portrait is missing */
 .who-mark__letter {
   font-size: 2.75rem;
 }
@@ -2178,6 +2211,7 @@ body[data-theme="dark"] .quiz__number {
 }
 
 .who-mark--large {
+  --print: min(4.5rem, 19vw);
   margin-block: var(--space-sm);
 }
 
@@ -2416,7 +2450,8 @@ body[data-theme="dark"] .quiz__number {
     animation: quiz-enter 360ms var(--ease-soft) both;
   }
 
-  .who__choice-photo img {
+  .who__choice-photo img,
+  .who-mark__print img {
     transition: opacity 400ms var(--ease-soft);
   }
 

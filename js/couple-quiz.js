@@ -114,17 +114,29 @@ function setup(manifest) {
   for (const node of [dom.invite, dom.section]) node.addEventListener("touchstart", () => {}, { passive: true });
 }
 
-// "J or M", echoing the site's monogram (decorative)
-function mark() {
+// "Jerrold or May": their two portraits as prints, like the fan's (decorative;
+// larger on the start page)
+function mark(large = false) {
   const or = el("span", "who-mark__or");
   dom.ors.push(or);
-  const node = decorative(el("span", "who-mark"));
-  node.append(el("span", "who-mark__letter", "J"), or, el("span", "who-mark__letter", "M"));
+  const node = decorative(el("span", large ? "who-mark who-mark--large" : "who-mark"));
+  node.append(markPerson("jerrold", large), or, markPerson("may", large));
   return node;
 }
 
-// Under the location quiz's invite: the same linen mat, with the mark in
-// place of the photos. The words are filled in by applyWords().
+// A person's print, or their initial if their portrait is missing
+function markPerson(person, large) {
+  const photo = photos[person];
+  if (!photo) return el("span", "who-mark__letter", PEOPLE[person].en[0]);
+  const { crop } = PEOPLE[person];
+  const print = el("span", "who-mark__print");
+  print.style.backgroundColor = photo.color || "transparent";
+  print.append(croppedImage(photo, crop, `${(large ? 4.5 : 3.5) * crop.zoom}rem`));
+  return print;
+}
+
+// Beside the location quiz's invite: the same linen mat, with the mark in
+// place of the fan. The words are filled in by applyWords().
 function buildInvite() {
   const invite = el("a", "quiz-invite quiz-invite--who");
   invite.href = `#${WHO_PATH}`;
@@ -153,8 +165,7 @@ function buildSection() {
   dom.title.id = "who-title";
   dom.title.tabIndex = -1;
   dom.intro = el("p", "quiz__intro");
-  const bigMark = mark();
-  bigMark.classList.add("who-mark--large");
+  const bigMark = mark(true);
   dom.begin = el("button", "quiz__button");
   dom.begin.type = "button";
   dom.begin.addEventListener("click", begin);
@@ -239,13 +250,19 @@ function buildSection() {
   return section;
 }
 
-// A choice's portrait (decorative: the name labels the button), zoomed in on
-// the face; its sizes grow with the zoom so a sharp enough file loads. Lazy,
-// so it loads only once the quiz page shows; it fades in when loaded, as the
-// cards do.
-function portrait(photo, { zoom, x, y }) {
+// A choice's portrait (decorative: the name labels the button). Lazy, so it
+// loads only once the quiz page shows.
+function portrait(photo, crop) {
   const frame = decorative(el("span", "who__choice-photo"));
   frame.style.backgroundColor = photo.color || "transparent";
+  const { zoom } = crop;
+  frame.append(croppedImage(photo, crop, `(min-width: 34rem) ${14 * zoom}rem, ${42 * zoom}vw`));
+  return frame;
+}
+
+// A portrait zoomed in on the face (decorative); its sizes grow with the zoom
+// so a sharp enough file loads. It fades in when loaded, as the cards do.
+function croppedImage(photo, { zoom, x, y }, sizes) {
   const img = new Image();
   img.addEventListener("load", () => img.classList.add("is-loaded"));
   img.alt = "";
@@ -255,11 +272,10 @@ function portrait(photo, { zoom, x, y }) {
   img.decoding = "async";
   img.style.scale = String(zoom);
   img.style.transformOrigin = `${x} ${y}`;
-  img.sizes = `(min-width: 34rem) ${14 * zoom}rem, ${42 * zoom}vw`;
+  img.sizes = sizes;
   img.srcset = ["sm", "md", "lg"].map((s) => `${photo.src[s].url} ${photo.src[s].width}w`).join(", ");
-  img.src = photo.src.md.url;
-  frame.append(img);
-  return frame;
+  img.src = photo.src.sm.url;
+  return img;
 }
 
 function newAttempt() {
