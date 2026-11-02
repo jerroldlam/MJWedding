@@ -131,7 +131,9 @@ function markPerson(person, large) {
   const { crop } = PEOPLE[person];
   const print = el("span", "who-mark__print");
   print.style.backgroundColor = photo.color || "transparent";
-  print.append(croppedImage(photo, crop, `${(large ? 4.5 : 3.5) * crop.zoom}rem`));
+  // The start page's prints grow on desktop (css/styles.css)
+  const sizes = large ? `(min-width: 52rem) ${11 * crop.zoom}rem, ${4.5 * crop.zoom}rem` : `${3.5 * crop.zoom}rem`;
+  print.append(croppedImage(photo, crop, sizes));
   return print;
 }
 
@@ -251,12 +253,12 @@ function buildSection() {
 }
 
 // A choice's portrait (decorative: the name labels the button). Lazy, so it
-// loads only once the quiz page shows.
+// loads only once the quiz page shows. The choices grow on desktop.
 function portrait(photo, crop) {
   const frame = decorative(el("span", "who__choice-photo"));
   frame.style.backgroundColor = photo.color || "transparent";
   const { zoom } = crop;
-  frame.append(croppedImage(photo, crop, `(min-width: 34rem) ${14 * zoom}rem, ${42 * zoom}vw`));
+  frame.append(croppedImage(photo, crop, `(min-width: 52rem) ${22 * zoom}rem, (min-width: 34rem) ${14 * zoom}rem, ${42 * zoom}vw`));
   return frame;
 }
 
@@ -387,7 +389,8 @@ function render() {
       const tag = button.querySelector(".who__choice-tag");
       tag.hidden = !isAnswer && !isMissed;
       tag.className = `who__choice-tag who__choice-tag--${isAnswer ? "answer" : "guess"}`;
-      tag.textContent = isAnswer ? w.whoTagAnswer : isMissed ? w.whoTagGuess : "";
+      // A hidden tag keeps words, so on desktop it holds a line's height (css/styles.css)
+      tag.textContent = isMissed ? w.whoTagGuess : w.whoTagAnswer;
     }
     dom.reveal.hidden = !pick;
     if (pick) {

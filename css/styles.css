@@ -2445,6 +2445,90 @@ body[data-theme="dark"] .quiz__number {
   margin-top: var(--space-sm);
 }
 
+/* Desktop, both quizzes: the start and question steps sit centred below the
+   bar and grow with the window. Each size is clamped by the width and the
+   height, so a short laptop screen still fits a whole question; phones,
+   tablets and the result pages are unchanged. */
+@media (min-width: 52rem) {
+  .quiz__start,
+  .quiz__ask {
+    justify-content: center;
+    min-height: calc(100svh - 12rem);
+  }
+
+  .quiz__start {
+    gap: clamp(1rem, 2.2vh, 2rem);
+  }
+
+  .quiz__start .quiz__title {
+    font-size: clamp(2.75rem, 2rem + 2.6vw, 4.5rem);
+  }
+
+  .quiz__start .quiz__intro {
+    font-size: clamp(1.25rem, 1rem + 0.6vw, 1.625rem);
+  }
+
+  .quiz__start .quiz-fan {
+    --print: clamp(4.5rem, min(10vw, 15vh), 10rem);
+    margin-block: clamp(0.75rem, 3vh, 2.5rem);
+  }
+
+  .quiz__start .who-mark--large {
+    --print: clamp(4.5rem, min(11vw, 17vh), 11rem);
+    gap: clamp(0.5rem, 1.6vw, 1.5rem);
+    margin-block: clamp(0.75rem, 3vh, 2.5rem);
+  }
+
+  .quiz__start .who-mark--large .who-mark__or {
+    font-size: clamp(1.5rem, 1rem + 1vw, 2.25rem);
+  }
+
+  .quiz__start .quiz__button {
+    min-height: 52px;
+    padding-inline: 2.25rem;
+  }
+
+  .quiz__ask .quiz__question {
+    font-size: clamp(2rem, min(1.6rem + 1.8vw, 7vh), 3.25rem);
+  }
+
+  .quiz__ask .quiz__answers {
+    max-width: clamp(30rem, 42vw, 40rem);
+  }
+
+  .quiz__ask .quiz__answer:not(.who__choice) {
+    min-height: clamp(3.25rem, 5.5vh, 4rem);
+    font-size: clamp(1.25rem, 0.9rem + 0.6vw, 1.5rem);
+  }
+
+  /* Fitted to the height too, with a low floor, so a short laptop window
+     still fits the longest question, both choices and the reveal */
+  .who__choices {
+    max-width: clamp(16rem, min(46vw, 100svh - 26rem), 44rem);
+  }
+
+  .who__choice {
+    font-size: clamp(1.5rem, 1rem + 0.8vw, 2rem);
+  }
+
+  /* The reveal and the tags keep their space, so the centred cards don't
+     jump when they appear */
+  .who__reveal[hidden] {
+    display: flex;
+    visibility: hidden;
+  }
+
+  .who__choice-tag[hidden] {
+    display: inline-flex;
+    visibility: hidden;
+  }
+
+  /* Empty before a guess, so it holds one line's height */
+  .who__verdict {
+    min-height: 1.3em;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .who__reveal:not([hidden]) {
     animation: quiz-enter 360ms var(--ease-soft) both;
