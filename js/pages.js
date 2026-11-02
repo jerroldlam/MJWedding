@@ -16,13 +16,15 @@
  * in css/styles.css); first loads, reduced motion and older browsers swap instantly.
  * Labels follow the language (i18n.js) and are relabelled when the guest switches.
  * The bar's location list fades only at the edges where names are hidden.
- * The quiz is a third kind of page ("#/quiz", "#/quiz/<slug>"), shown with
- * the bar; its steps and result are quiz.js's.
+ * The quizzes are a third kind of page ("#/quiz…" in quiz.js, "#/who…" in
+ * couple-quiz.js), shown with the bar; each page object says which addresses
+ * are its own (owns) and shows its steps and result itself (show).
  */
 
 import { words, placeName, caption, onLanguageChange } from "./i18n.js";
 import { cardPhoto, numeral } from "./locations.js";
-import { QUIZ_PATH, isQuizPath, quizPage, showQuiz } from "./quiz.js";
+import { quizPage } from "./quiz.js";
+import { whoPage } from "./couple-quiz.js";
 import { parseHash } from "./routes.js";
 
 const READY_EVENT = "photobook:gallery-ready";
@@ -37,7 +39,8 @@ const VIEWER_OPEN_CLASS = "viewer-open"; // set by viewer.js
 let pages = [];
 let byPath = new Map();
 let current = null; // null = the contents page
-let quiz = null; // the quiz page (quiz.js), if it was built
+let quizzes = []; // the quiz pages that were built (quiz.js, couple-quiz.js)
+const isQuiz = (page) => page?.kind === "quiz";
 let fade = null; // the latest page fade still running, if any
 let coverAtTop = true; // the cover overlaps the top of the screen (contents only)
 const dom = {};
@@ -105,8 +108,8 @@ function setup(manifest) {
     page.next = pages[index + 1] || null;
   });
   byPath = new Map(pages.map((page) => [page.route, page]));
-  quiz = quizPage();
-  if (quiz) byPath.set(QUIZ_PATH, quiz);
+  quizzes = [quizPage(), whoPage()].filter(Boolean);
+  for (const quiz of quizzes) byPath.set(quiz.route, quiz);
   history.scrollRestoration = "manual";
 
   pages.forEach((page) => page.section.append(buildEndPanel(page)));
@@ -265,7 +268,6 @@ function applyWords() {
     line.textContent = w.closingLine;
     if (sign) sign.textContent = w.closingSign;
   }
-  if (quiz) quiz.title = w.quizPageTitle;
   document.title = current ? `${current.title} · ${SITE_TITLE}` : SITE_TITLE;
   // The names change width with the language
   if (dom.list) updateFades();
@@ -277,7 +279,8 @@ function resolve(hash) {
   const route = parseHash(hash);
   if (route.kind === "invalid") return { page: null, valid: false };
   if (route.kind === "location") {
-    if (quiz && isQuizPath(route.path)) return { page: quiz, quizPath: route.path, valid: true };
+    const quiz = quizzes.find((q) => q.owns(route.path));
+    if (quiz) return { page: quiz, quizPath: route.path, valid: true };
     const page = byPath.get(route.path);
     return page ? { page, valid: true } : { page: null, valid: false };
   }
@@ -310,7 +313,7 @@ function initialRoute() {
     });
   } else if (page) {
     history.replaceState({ page: "contents" }, "", contentsUrl());
-    history.pushState({ page: page === quiz ? "quiz" : "location", depth: 1 }, "", `#${quizPath ?? page.route}`);
+    history.pushState({ page: isQuiz(page) ? "quiz" : "location", depth: 1 }, "", `#${quizPath ?? page.route}`);
     if (photoKey) history.pushState({ viewer: true }, "", `#photo/${photoKey}`);
     // No focus on arrival: the page starts at the heading, and focusing it
     // would draw a focus box before the guest has done anything.
@@ -346,7 +349,7 @@ function goTo(page) {
   }
   const depth = current ? (history.state?.depth || 0) + 1 : 1;
   saveScroll();
-  history.pushState({ page: page === quiz ? "quiz" : "location", depth }, "", `#${page.route}`);
+  history.pushState({ page: isQuiz(page) ? "quiz" : "location", depth }, "", `#${page.route}`);
   changePage(page, { scroll: "top", focus: true, quizPath: page.route });
 }
 
@@ -367,10 +370,10 @@ function onPopState() {
     page = null;
     photoKey = undefined;
   }
-  // The quiz already showing, with an edited address (e.g. "#/quiz/beach"):
+  // A quiz already showing, with an edited address (e.g. "#/quiz/beach"):
   // the quiz shows what it names.
-  if (page && page === current && page === quiz) {
-    showQuiz(quizPath, Boolean(history.state?.quizOwn), tintForQuiz);
+  if (page && page === current && isQuiz(page)) {
+    page.show(quizPath, Boolean(history.state?.quizOwn), tintForQuiz);
     return;
   }
   // Same page: a photo opening or closing (the viewer's business), or an anchor.
@@ -423,19 +426,19 @@ function show(page, { scroll, focus, quizPath, quizOwn }) {
   // back shows the cover complete instead of replaying it.
   if (page && document.body.dataset.page === "contents") dom.cover?.classList.add("is-entered");
   current = page;
-  document.body.dataset.page = !page ? "contents" : page === quiz ? "quiz" : "location";
+  document.body.dataset.page = !page ? "contents" : isQuiz(page) ? "quiz" : "location";
   for (const p of pages) {
     p.section.hidden = p !== page;
     p.barLink.classList.toggle("is-active", p === page);
     if (p === page) p.barLink.setAttribute("aria-current", "page");
     else p.barLink.removeAttribute("aria-current");
   }
-  if (quiz) quiz.section.hidden = page !== quiz;
+  for (const quiz of quizzes) quiz.section.hidden = quiz !== page;
   dom.bar.hidden = !page;
   if (page?.barLink) centreInRow(page.barLink);
 
-  // The quiz tints the page itself: its result wears the location's colours
-  if (page === quiz) showQuiz(quizPath ?? QUIZ_PATH, Boolean(quizOwn), tintForQuiz);
+  // A quiz tints the page itself: a location result wears its colours
+  if (isQuiz(page)) page.show(quizPath ?? page.route, Boolean(quizOwn), tintForQuiz);
   else applyTheme(page ? page.theme : "light", page ? page.sectionId : null);
   document.title = page ? `${page.title} · ${SITE_TITLE}` : SITE_TITLE;
 

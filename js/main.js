@@ -7,6 +7,7 @@
  * blanks the page. The page is usable without JavaScript; features enhance it.
  */
 
+import { init as initCoupleQuiz } from "./couple-quiz.js";
 import { init as initGallery } from "./gallery.js";
 import { init as initLocations } from "./locations.js";
 import { init as initPages } from "./pages.js";
@@ -17,6 +18,7 @@ const features = [
   { name: "gallery", init: initGallery },
   { name: "locations", init: initLocations },
   { name: "quiz", init: initQuiz },
+  { name: "couple quiz", init: initCoupleQuiz },
   { name: "pages", init: initPages },
   { name: "viewer", init: initViewer },
 ];

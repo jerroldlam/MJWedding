@@ -6,24 +6,26 @@
  *
  * Addresses: "#/quiz" is the quiz (its start, or the question in progress) and
  * "#/quiz/<slug>" a result, so a result can be shared. pages.js shows the page
- * (with the pinned bar) and owns history; this module owns the steps, which
- * add no history entries, so back always leaves the quiz. Finishing rewrites
- * the current entry to the result's address with quizOwn in its state: the
- * guest's own result says "You're most like…", while a friend's link (no
- * quizOwn) invites them to take it. The attempt lives in memory only.
- * Words follow the language (i18n.js, quiz-content.js), relabelled on a switch.
+ * (with the pinned bar) through the page object's owns() and show(), and owns
+ * history; this module owns the steps, which add no history entries, so back
+ * always leaves the quiz. Finishing rewrites the current entry to the result's
+ * address with quizOwn in its state: the guest's own result says "You're most
+ * like…", while a friend's link (no quizOwn) invites them to take it. The
+ * attempt lives in memory only. Words follow the language (i18n.js,
+ * quiz-content.js), relabelled on a switch. Shuffling, the address and
+ * sharing are shared with the couple quiz (quiz-common.js).
  */
 
 import { words, lang, placeName, onLanguageChange } from "./i18n.js";
 import { cardPhoto, numeral } from "./locations.js";
 import { QUESTIONS, RESULTS } from "./quiz-content.js";
+import { shuffle, replaceAddress, canShare, share, inviteRow } from "./quiz-common.js";
 
 const READY_EVENT = "photobook:gallery-ready";
-export const QUIZ_PATH = "/quiz";
+const QUIZ_PATH = "/quiz";
 const SITE_TITLE = "Jerrold & May";
 // How long the chosen answer shows before the next question
 const CHOSEN_MS = 280;
-const STATUS_MS = 3000;
 const RESULT_SIZES = "(min-width: 52rem) 18rem, min(18rem, 72vw)";
 const KEYS = Object.keys(RESULTS);
 
@@ -35,9 +37,8 @@ let view = "start"; // "start" | "question" | "result"
 let result = null; // { key, own }
 let busy = false; // the chosen answer is showing
 let tint = () => {}; // from pages.js: tints the page for a location (null = none)
-let statusTimer = null;
 
-export function isQuizPath(path) {
+function isQuizPath(path) {
   return path === QUIZ_PATH || path.startsWith(`${QUIZ_PATH}/`);
 }
 
@@ -50,9 +51,9 @@ export function quizPage() {
   return page;
 }
 
-// pages.js calls this each time the quiz page shows: a result for a known
-// slug, otherwise the question in progress or the start.
-export function showQuiz(path, own, tintPage) {
+// pages.js calls this (the page's show()) each time the quiz page shows: a
+// result for a known slug, otherwise the question in progress or the start.
+function showQuiz(path, own, tintPage) {
   if (!page) return;
   tint = tintPage;
   const slug = path.slice(QUIZ_PATH.length + 1);
@@ -117,13 +118,17 @@ function setup(manifest) {
   if (!complete) return;
 
   attempt = newAttempt();
-  menu.append(buildInvite());
+  inviteRow(menu).append(buildInvite());
   gallery.after(buildSection());
   page = {
     kind: "quiz",
     route: QUIZ_PATH,
     section: dom.section,
-    title: "", // set by pages.js
+    owns: isQuizPath,
+    show: showQuiz,
+    get title() {
+      return words().quizPageTitle;
+    },
     get heading() {
       return currentHeading();
     },
@@ -246,7 +251,7 @@ function buildSection() {
   dom.retake = el("button", "quiz__quiet");
   for (const button of [dom.takeIt, dom.share, dom.retake]) button.type = "button";
   dom.takeIt.addEventListener("click", restart);
-  dom.share.addEventListener("click", share);
+  dom.share.addEventListener("click", shareResult);
   dom.retake.addEventListener("click", restart);
   actions.append(dom.view, dom.takeIt, dom.share, dom.retake);
   dom.status = el("p", "quiz__status");
@@ -264,14 +269,6 @@ function buildSection() {
 
 function newAttempt() {
   return { order: QUESTIONS.map(() => shuffle([...KEYS])), answers: QUESTIONS.map(() => null), step: 0 };
-}
-
-function shuffle(items) {
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]];
-  }
-  return items;
 }
 
 function currentHeading() {
@@ -375,40 +372,12 @@ function score(answers) {
   return answers[answers.length - 1];
 }
 
-// Rewrites the current history entry's address (and its own-result flag);
-// the entry's other state (depth, scroll) and ?lang= stay.
-function replaceAddress(path, own) {
-  const state = { ...(history.state || {}) };
-  delete state.quizOwn;
-  if (own) state.quizOwn = true;
-  history.replaceState(state, "", `#${path}`);
-}
-
-function canShare() {
-  return typeof navigator.share === "function" || typeof navigator.clipboard?.writeText === "function";
-}
-
 // The phone's own share sheet, or else the link copied
-async function share() {
+function shareResult() {
   if (!result) return;
   const { shoot, chapter } = spots.get(result.key);
   const text = words().quizShareText(placeName(shoot.id, chapter.id, chapter.title));
-  const url = location.href;
-  try {
-    if (typeof navigator.share === "function") {
-      await navigator.share({ title: SITE_TITLE, text, url });
-      return;
-    }
-    await navigator.clipboard.writeText(url);
-    dom.status.textContent = words().quizCopied;
-    clearTimeout(statusTimer);
-    statusTimer = setTimeout(() => {
-      dom.status.textContent = "";
-    }, STATUS_MS);
-  } catch (error) {
-    // Closing the share sheet isn't a failure
-    if (error?.name !== "AbortError") console.error("[photobook] quiz share failed", error);
-  }
+  share({ title: SITE_TITLE, text, url: location.href }, dom.status, words().quizCopied);
 }
 
 // The current step's words: the question with its answers in this attempt's
