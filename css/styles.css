@@ -2299,22 +2299,39 @@ body[data-theme="dark"] .quiz__number {
   rotate: 45deg;
 }
 
-/* A missed guess: its portrait greyed and faded, its name struck through */
+/* A wrong guess keeps its photo and name (greying them read as marking the
+   person down); its mat goes back to plain ivory, and the tags say which
+   card is the answer and which the guess */
 .who__choice.is-missed {
   background: var(--ivory);
+  box-shadow: inset 0 0 0 1px var(--color-line), 0 1px 2px rgba(24, 14, 6, 0.06);
+}
+
+.who__choice-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-top: -0.15rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.who__choice-tag[hidden] {
+  display: none;
+}
+
+.who__choice-tag--answer {
+  background: var(--color-accent-strong);
+  color: var(--ivory);
+}
+
+.who__choice-tag--guess {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
   color: var(--color-muted);
-  box-shadow: inset 0 0 0 1px var(--color-line);
-}
-
-.who__choice.is-missed .who__choice-name {
-  text-decoration: line-through;
-  text-decoration-color: var(--color-accent);
-  text-decoration-thickness: 1px;
-}
-
-.who__choice.is-missed .who__choice-photo {
-  filter: grayscale(1);
-  opacity: 0.55;
 }
 
 /* The reveal: the verdict, then Next */
@@ -2403,8 +2420,8 @@ body[data-theme="dark"] .quiz__number {
     transition: opacity 400ms var(--ease-soft);
   }
 
-  .who__choice-photo {
-    transition: filter 300ms var(--ease-soft), opacity 300ms var(--ease-soft);
+  .who__choice-tag:not([hidden]) {
+    animation: quiz-enter 360ms var(--ease-soft) both;
   }
 }
 

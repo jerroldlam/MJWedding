@@ -180,7 +180,10 @@ function buildSection() {
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => choose(person));
     if (photos[person]) button.append(portrait(photos[person], PEOPLE[person].crop));
-    button.append(el("span", "who__choice-name"));
+    // After a guess, a tag says which card is the answer and which the guess
+    const tag = el("span", "who__choice-tag");
+    tag.hidden = true;
+    button.append(el("span", "who__choice-name"), tag);
     const item = el("li");
     item.append(button);
     list.append(item);
@@ -361,8 +364,14 @@ function render() {
       button.setAttribute("aria-pressed", String(pick === person));
       if (pick) button.setAttribute("aria-disabled", "true");
       else button.removeAttribute("aria-disabled");
-      button.classList.toggle("is-answer", Boolean(pick) && person === answer);
-      button.classList.toggle("is-missed", Boolean(pick) && person === pick && pick !== answer);
+      const isAnswer = Boolean(pick) && person === answer;
+      const isMissed = Boolean(pick) && person === pick && pick !== answer;
+      button.classList.toggle("is-answer", isAnswer);
+      button.classList.toggle("is-missed", isMissed);
+      const tag = button.querySelector(".who__choice-tag");
+      tag.hidden = !isAnswer && !isMissed;
+      tag.className = `who__choice-tag who__choice-tag--${isAnswer ? "answer" : "guess"}`;
+      tag.textContent = isAnswer ? w.whoTagAnswer : isMissed ? w.whoTagGuess : "";
     }
     dom.reveal.hidden = !pick;
     if (pick) {
