@@ -61,16 +61,16 @@ export const QUESTIONS = [
   },
   {
     en: "get you both lost?",
-    zh: "带着两个人一起迷路？",
+    zh: "带路带到两个人一起迷路？",
     answer: "may",
     chat: [
-      { who: "may", en: "You see my phone, it is pointing us in this direction!", zh: "你看我的手机，它就是指这个方向！" },
-      { who: "jerrold", en: "Do you even see a road?", zh: "你有看到路吗？" },
+      { who: "may", en: "You see my phone, it is pointing us in this direction!", zh: "你看我的手机，它明明指着这个方向！" },
+      { who: "jerrold", en: "Do you even see a road?", zh: "你看到哪里有路了？" },
     ],
   },
   {
     en: "win an argument?",
-    zh: "吵架吵赢？",
+    zh: "吵架吵赢对方？",
     answer: "jerrold",
     chat: [
       { who: "may", en: "Why you so aggressive?", zh: "你干吗这么凶？" },
@@ -98,7 +98,7 @@ export const QUESTIONS = [
   },
   {
     en: "want the aircon colder?",
-    zh: "想把冷气开得更冷？",
+    zh: "想把冷气调得更低？",
     answer: "jerrold",
     chat: [
       { who: "jerrold", en: "eh damn hot leh", zh: "哎，热死了啦" },
@@ -158,14 +158,14 @@ export const BANDS = [
     min: 5,
     max: 5,
     en: "Coin flip?",
-    zh: "抛硬币吗？",
+    zh: "靠抛硬币的吗？",
     line: { en: "Exactly half. Did you tap the same name every time?", zh: "刚好一半。你是不是每题都点同一个人？" },
   },
   {
     min: 6,
     max: 7,
     en: "Kopi kaki",
-    zh: "咖啡好友",
+    zh: "咖啡搭子",
     line: { en: "You know us over coffee. Ask us for the rest.", zh: "一起喝过咖啡，剩下的故事下次说。" },
   },
   {
@@ -179,7 +179,7 @@ export const BANDS = [
     min: 10,
     max: 10,
     en: "Were you in our group chat?",
-    zh: "你是不是在我们的群组里？",
+    zh: "你是不是在我们的群聊里？",
     line: { en: "A perfect score. Either you know us too well, or someone told you.", zh: "满分！要么你太懂我们，要么有人泄题了。" },
   },
 ];
