@@ -149,7 +149,7 @@ const WORDS = {
     whoNext: "下一题",
     whoSeeScore: "看看我的分数",
     whoYouScored: "你的得分",
-    whoFriendScored: "你的朋友得了",
+    whoFriendScored: "朋友的得分",
     whoScoreSpoken: (n, total) => `${n} 分，满分 ${total} 分`,
     whoShare: "分享我的分数",
     whoTakeIt: "你能超过这个分数吗？来测一测",
