@@ -13,7 +13,8 @@
  * address with quizOwn in its state: the guest's own score says "You scored",
  * while a friend's link (no quizOwn) invites them to take it. The attempt
  * lives in memory only. Words follow the language (i18n.js,
- * couple-quiz-content.js), relabelled on a switch.
+ * couple-quiz-content.js), relabelled on a switch. Each reveal carries the
+ * couple's two-line exchange (or a sticker), from the question's chat.
  */
 
 import { words, lang, onLanguageChange } from "./i18n.js";
@@ -25,6 +26,8 @@ const WHO_PATH = "/who";
 const SITE_TITLE = "Jerrold & May";
 const ORDER = ["jerrold", "may"]; // the choices, always in this order
 const SCORE = /^(?:10|[0-9])$/;
+// Chinese characters and punctuation, marked as Chinese inside an English line
+const CJK = /[　-〿一-鿿＀-￯]+/g;
 
 let page = null; // the page object pages.js shows; null until built
 const dom = { ors: [] };
@@ -73,6 +76,10 @@ function el(tag, className, text) {
 function decorative(node) {
   node.setAttribute("aria-hidden", "true");
   return node;
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function findPhoto(manifest, id) {
@@ -209,7 +216,9 @@ function buildSection() {
   dom.next = el("button", "quiz__button");
   dom.next.type = "button";
   dom.next.addEventListener("click", next);
-  dom.reveal.append(dom.verdict, dom.next);
+  // The couple's exchange, filled for each question by render()
+  dom.chat = el("ol", "who__chat");
+  dom.reveal.append(dom.verdict, dom.chat, dom.next);
   ask.append(progress, dom.question, list, dom.reveal);
 
   const end = el("div", "quiz__step quiz__result");
@@ -281,6 +290,67 @@ function croppedImage(photo, { zoom, x, y }, sizes) {
   return img;
 }
 
+// A speaker's round portrait beside their line (decorative: the name says who),
+// or their initial if their portrait is missing
+function avatar(person) {
+  const node = decorative(el("span", "who__avatar"));
+  const photo = photos[person];
+  if (!photo) {
+    node.classList.add("who__avatar--initial");
+    node.textContent = PEOPLE[person].en[0];
+    return node;
+  }
+  const crop = PEOPLE[person].avatar;
+  node.style.backgroundColor = photo.color || "transparent";
+  // Sized for the largest circle (desktop), so it stays sharp
+  node.append(croppedImage(photo, crop, `${3.25 * crop.zoom}rem`));
+  return node;
+}
+
+// An English line's text, with any Chinese in it marked as Chinese (for
+// screen readers' pronunciation and the font)
+function textWithLang(text) {
+  const nodes = [];
+  let last = 0;
+  for (const match of text.matchAll(CJK)) {
+    if (match.index > last) nodes.push(document.createTextNode(text.slice(last, match.index)));
+    const run = el("span", "", match[0]);
+    run.lang = "zh-Hans";
+    nodes.push(run);
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) nodes.push(document.createTextNode(text.slice(last)));
+  return nodes;
+}
+
+// The question's exchange: one line per speaker, read as "Jerrold: …"
+function renderChat(question, language) {
+  const lines = (question.chat || []).map((line) => {
+    const item = el("li", `who__line who__line--${line.who}`);
+    const bubble = el("div", "who__bubble");
+    bubble.append(el("span", "who__speaker", PEOPLE[line.who][language]), el("span", "visually-hidden", ": "));
+    if (line.image) {
+      const img = new Image();
+      img.className = "who__sticker";
+      img.alt = line.image.alt[language];
+      img.width = line.image.width;
+      img.height = line.image.height;
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.src = line.image.src;
+      bubble.append(img);
+    } else {
+      const said = el("p", "who__said");
+      if (language === "en") said.append(...textWithLang(line.en));
+      else said.textContent = line.zh;
+      bubble.append(said);
+    }
+    item.append(avatar(line.who), bubble);
+    return item;
+  });
+  dom.chat.replaceChildren(...lines);
+}
+
 function newAttempt() {
   return { order: shuffle(QUESTIONS.map((_, i) => i)), picks: QUESTIONS.map(() => null), step: 0 };
 }
@@ -319,6 +389,8 @@ function choose(person) {
   attempt.picks[attempt.step] = person;
   render();
   dom.verdict.focus();
+  // On a short screen, bring the exchange and Next into view
+  dom.reveal.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "instant" : "smooth" });
 }
 
 function next() {
@@ -393,6 +465,9 @@ function render() {
       // A hidden tag keeps words, so on desktop it holds a line's height (css/styles.css)
       tag.textContent = isMissed ? w.whoTagGuess : w.whoTagAnswer;
     }
+    // Filled even before a guess, inside the hidden reveal, so desktop can
+    // keep its space (css/styles.css); it's neither seen nor read until then
+    renderChat(question(), language);
     dom.reveal.hidden = !pick;
     if (pick) {
       const name = PEOPLE[answer][language];
