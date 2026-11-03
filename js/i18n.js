@@ -35,7 +35,7 @@ const CAPTIONS = {
   "outdoor/flower-field": { en: "a field in bloom", zh: "花开满田" },
   "outdoor/open-field": { en: "golden hour in the long grass", zh: "长草间的金色时光" },
   "outdoor/beach": { en: "the last of the light", zh: "最后一抹余晖" },
-  "studio/studio": { en: "just the two of us", zh: "只有我们俩" },
+  "studio/studio": { en: "just the two of us", zh: "二人世界" },
 };
 
 export function caption(shootId, chapterId) {
