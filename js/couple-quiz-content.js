@@ -73,8 +73,8 @@ export const QUESTIONS = [
     zh: "吵架吵赢对方？",
     answer: "jerrold",
     chat: [
-      { who: "may", en: "Why you so aggressive?", zh: "你干吗这么凶？" },
-      { who: "jerrold", en: "You play where", zh: "你玩我啊？" },
+      { who: "may", en: "Okay lah, you’re right.", zh: "好啦，你说得对。" },
+      { who: "jerrold", en: "Of course.", zh: "那当然。" },
     ],
   },
   {
