@@ -1,5 +1,5 @@
 /*
- * Quiz content: the "Which of our locations are you?" questions, their answers
+ * Quiz content: the "Find your place" questions, their answers
  * and the five results, in English and Simplified Chinese side by side. Each
  * answer and result is keyed by location ("<shoot>/<chapter>"). The interface
  * words (Begin, Share…) are in i18n.js. The Chinese font helper reads this
@@ -26,7 +26,7 @@ export const QUESTIONS = [
       "outdoor/flower-field": { en: "bandung", zh: "玫瑰露奶" },
       "outdoor/open-field": { en: "whatever’s in the fridge", zh: "冰箱里有什么就喝什么" },
       "outdoor/beach": { en: "fresh coconut", zh: "新鲜椰子水" },
-      "studio/studio": { en: "an oat flat white, ordered just so", zh: "燕麦奶馥芮白，要求一点都不能差" },
+      "studio/studio": { en: "an oat flat white, ordered just so", zh: "燕麦奶馥芮白，点得一丝不苟" },
     },
   },
   {
@@ -45,10 +45,10 @@ export const QUESTIONS = [
     zh: "要拍大合照了",
     answers: {
       "outdoor/forest": { en: "back row, happy just to be there", zh: "站在后排，能在场就很开心" },
-      "outdoor/flower-field": { en: "you know your best angle and where the light is", zh: "你知道自己最好看的角度，也知道光在哪里" },
-      "outdoor/open-field": { en: "your best shot is always the candid one", zh: "你最好看的照片，永远是抓拍的那张" },
+      "outdoor/flower-field": { en: "angled just right, facing the light", zh: "找准角度，面朝光线" },
+      "outdoor/open-field": { en: "caught mid-laugh in the candid", zh: "被抓拍到笑得最开心的那一刻" },
       "outdoor/beach": { en: "first to suggest a jump shot", zh: "第一个提议来张跳跃照" },
-      "studio/studio": { en: "you’re the one directing everyone", zh: "你就是那个指挥大家站位的人" },
+      "studio/studio": { en: "directing everyone into place", zh: "指挥大家站好位置" },
     },
   },
   {
@@ -68,14 +68,14 @@ export const QUESTIONS = [
     answers: {
       "outdoor/forest": { en: "someone to listen", zh: "一个愿意倾听的人" },
       "outdoor/flower-field": { en: "someone who remembers every birthday", zh: "一个记得每个人生日的人" },
-      "outdoor/open-field": { en: "a last-minute plus-one", zh: "一个临时能陪他们出席的伴" },
+      "outdoor/open-field": { en: "a last-minute plus-one", zh: "一个随叫随到的伴" },
       "outdoor/beach": { en: "someone to get the gathering going", zh: "一个能让聚会热闹起来的人" },
       "studio/studio": { en: "an honest opinion on an outfit", zh: "一句关于穿搭的真心话" },
     },
   },
   {
-    en: "Pick a time of day",
-    zh: "选一天中的一个时刻",
+    en: "Your favourite time of day",
+    zh: "你最喜欢一天中的哪个时刻？",
     answers: {
       "outdoor/forest": { en: "early morning mist", zh: "清晨的薄雾" },
       "outdoor/flower-field": { en: "golden hour", zh: "黄昏前的金色时光" },
@@ -122,10 +122,10 @@ export const RESULTS = {
   },
   "studio/studio": {
     slug: "studio",
-    tagline: { en: "Classic, polished, always ready.", zh: "经典优雅，永远准备就绪" },
+    tagline: { en: "Classic, polished, always ready.", zh: "经典优雅，随时都准备好了" },
     text: {
       en: "You have a plan, a backup plan, and an outfit for both. You believe the details matter, and they do: people trust you to make things beautiful. Calm under the lights, you’re the one everyone turns to when it really counts.",
-      zh: "你有计划，有备用计划，还有搭配两者的衣服。你相信细节很重要，事实也是如此：大家都放心把事情交给你，因为你总能把它们变得美好。聚光灯下依然从容，关键时刻，大家第一个想到的就是你。",
+      zh: "你有计划，有备用计划，还为两个计划都配好了衣服。你相信细节很重要，事实也是如此：大家都放心把事情交给你，因为你总能把它们变得美好。聚光灯下依然从容，关键时刻，大家第一个想到的就是你。",
     },
   },
 };
