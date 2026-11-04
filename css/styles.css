@@ -1759,7 +1759,7 @@ body:not([data-page="quiz"]) .quiz {
   margin-block: var(--space-sm);
 }
 
-/* Begin, Share and a friend's "Which are you?": boxed like "Back to contents" */
+/* Begin, Share and a friend's "What’s your place?": boxed like "Back to contents" */
 .quiz__button {
   display: inline-flex;
   align-items: center;

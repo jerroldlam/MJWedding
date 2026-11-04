@@ -1,5 +1,5 @@
 /*
- * Quiz: "Which of our locations are you?" Seven questions whose answers each
+ * Quiz: "Find your place" Seven questions whose answers each
  * count towards one location, ending on that location as the guest's result:
  * its card photo, numeral and colours, a few lines in the couple's voice and a
  * link into its photos. An invite under the location cards opens it.
@@ -330,7 +330,7 @@ function finish() {
   showResult(key, true);
 }
 
-// "Take the quiz again", and a friend's "Which are you?"
+// "Take the quiz again", and a friend's "What’s your place?"
 function restart() {
   replaceAddress(QUIZ_PATH, false);
   tint(null);
