@@ -54,6 +54,8 @@
   --ash: #A39B90;
   --champagne: #B89B72;
   --champagne-strong: #8C7350;
+  /* A shade deeper, for small ivory text on champagne (about 5:1) */
+  --champagne-deep: #7E6747;
 
   /* Location backgrounds, sampled from each location's photos */
   --dusk: #DCE3EA;
@@ -2348,7 +2350,7 @@ body[data-theme="dark"] .quiz__number {
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   font-family: var(--font-ui);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   line-height: 1.4;
@@ -2359,7 +2361,7 @@ body[data-theme="dark"] .quiz__number {
 }
 
 .who__choice-tag--answer {
-  background: var(--color-accent-strong);
+  background: var(--champagne-deep);
   color: var(--ivory);
 }
 
@@ -2478,6 +2480,13 @@ body[data-theme="dark"] .quiz__number {
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-muted);
+}
+
+/* Chinese characters need a little more size than Latin capitals to stay
+   legible this small */
+:root:lang(zh) .who__choice-tag,
+:root:lang(zh) .who__speaker {
+  font-size: 0.8125rem;
 }
 
 /* A long shout ("YYYYAAAA…") wraps inside its bubble */
@@ -2660,6 +2669,10 @@ body[data-theme="dark"] .quiz__number {
 
   .who__speaker {
     font-size: 0.8125rem;
+  }
+
+  :root:lang(zh) .who__speaker {
+    font-size: 0.875rem;
   }
 
   .who__said {
