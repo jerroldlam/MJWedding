@@ -60,6 +60,30 @@
               }
             },
             {
+              "id": "as200062",
+              "width": 3072,
+              "height": 4608,
+              "alt": "Jerrold & May in the forest",
+              "color": "#2b291d",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/forest/sm/as200062.webp",
+                  "width": 427,
+                  "height": 640
+                },
+                "md": {
+                  "url": "images/outdoor/forest/md/as200062.webp",
+                  "width": 853,
+                  "height": 1280
+                },
+                "lg": {
+                  "url": "images/outdoor/forest/lg/as200062.webp",
+                  "width": 1600,
+                  "height": 2400
+                }
+              }
+            },
+            {
               "id": "as200191",
               "width": 3072,
               "height": 4608,
@@ -176,6 +200,30 @@
                   "url": "images/outdoor/forest/lg/as200063.webp",
                   "width": 1600,
                   "height": 2400
+                }
+              }
+            },
+            {
+              "id": "as200024",
+              "width": 4608,
+              "height": 3072,
+              "alt": "Jerrold & May in the forest",
+              "color": "#3b3f2a",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/forest/sm/as200024.webp",
+                  "width": 640,
+                  "height": 427
+                },
+                "md": {
+                  "url": "images/outdoor/forest/md/as200024.webp",
+                  "width": 1280,
+                  "height": 853
+                },
+                "lg": {
+                  "url": "images/outdoor/forest/lg/as200024.webp",
+                  "width": 2400,
+                  "height": 1600
                 }
               }
             },
@@ -348,6 +396,30 @@
               }
             },
             {
+              "id": "as200050",
+              "width": 4608,
+              "height": 3072,
+              "alt": "Jerrold & May in the forest",
+              "color": "#574a3a",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/forest/sm/as200050.webp",
+                  "width": 640,
+                  "height": 427
+                },
+                "md": {
+                  "url": "images/outdoor/forest/md/as200050.webp",
+                  "width": 1280,
+                  "height": 853
+                },
+                "lg": {
+                  "url": "images/outdoor/forest/lg/as200050.webp",
+                  "width": 2400,
+                  "height": 1600
+                }
+              }
+            },
+            {
               "id": "fsc00030",
               "width": 3072,
               "height": 4608,
@@ -462,6 +534,30 @@
                 },
                 "lg": {
                   "url": "images/outdoor/forest/lg/fsc00016.webp",
+                  "width": 1600,
+                  "height": 2400
+                }
+              }
+            },
+            {
+              "id": "fsc00194",
+              "width": 3072,
+              "height": 4608,
+              "alt": "Jerrold & May in the forest",
+              "color": "#69634e",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/forest/sm/fsc00194.webp",
+                  "width": 427,
+                  "height": 640
+                },
+                "md": {
+                  "url": "images/outdoor/forest/md/fsc00194.webp",
+                  "width": 853,
+                  "height": 1280
+                },
+                "lg": {
+                  "url": "images/outdoor/forest/lg/fsc00194.webp",
                   "width": 1600,
                   "height": 2400
                 }
@@ -1706,6 +1802,30 @@
               }
             },
             {
+              "id": "fsc00407",
+              "width": 4608,
+              "height": 3072,
+              "alt": "Jerrold & May in the open field",
+              "color": "#665542",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/open-field/sm/fsc00407.webp",
+                  "width": 640,
+                  "height": 427
+                },
+                "md": {
+                  "url": "images/outdoor/open-field/md/fsc00407.webp",
+                  "width": 1280,
+                  "height": 853
+                },
+                "lg": {
+                  "url": "images/outdoor/open-field/lg/fsc00407.webp",
+                  "width": 2400,
+                  "height": 1600
+                }
+              }
+            },
+            {
               "id": "as200651",
               "width": 3072,
               "height": 4608,
@@ -1994,6 +2114,30 @@
               }
             },
             {
+              "id": "as200503",
+              "width": 3072,
+              "height": 4608,
+              "alt": "Jerrold & May in the open field",
+              "color": "#8e8e89",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/open-field/sm/as200503.webp",
+                  "width": 427,
+                  "height": 640
+                },
+                "md": {
+                  "url": "images/outdoor/open-field/md/as200503.webp",
+                  "width": 853,
+                  "height": 1280
+                },
+                "lg": {
+                  "url": "images/outdoor/open-field/lg/as200503.webp",
+                  "width": 1600,
+                  "height": 2400
+                }
+              }
+            },
+            {
               "id": "as200603",
               "width": 3072,
               "height": 4608,
@@ -2156,6 +2300,30 @@
                 },
                 "lg": {
                   "url": "images/outdoor/open-field/lg/fsc00666.webp",
+                  "width": 1600,
+                  "height": 2400
+                }
+              }
+            },
+            {
+              "id": "fsc00700",
+              "width": 3072,
+              "height": 4608,
+              "alt": "Jerrold & May in the open field",
+              "color": "#483f31",
+              "src": {
+                "sm": {
+                  "url": "images/outdoor/open-field/sm/fsc00700.webp",
+                  "width": 427,
+                  "height": 640
+                },
+                "md": {
+                  "url": "images/outdoor/open-field/md/fsc00700.webp",
+                  "width": 853,
+                  "height": 1280
+                },
+                "lg": {
+                  "url": "images/outdoor/open-field/lg/fsc00700.webp",
                   "width": 1600,
                   "height": 2400
                 }
