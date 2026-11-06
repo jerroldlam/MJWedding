@@ -74,14 +74,14 @@ export const QUESTIONS = [
     },
   },
   {
-    en: "Your favourite time of day",
-    zh: "你最喜欢一天中的哪个时刻？",
+    en: "Your ideal Friday night",
+    zh: "你理想中的周五晚上",
     answers: {
-      "outdoor/forest": { en: "early morning mist", zh: "清晨的薄雾" },
-      "outdoor/flower-field": { en: "golden hour", zh: "黄昏前的金色时光" },
-      "outdoor/open-field": { en: "a slow, lazy afternoon", zh: "慢悠悠的午后" },
-      "outdoor/beach": { en: "dusk by the water", zh: "水边的暮色" },
-      "studio/studio": { en: "late at night, lights low", zh: "夜深了，灯光微暗" },
+      "outdoor/forest": { en: "dinner with one close friend, talking till late", zh: "和一位知己吃顿饭，聊到深夜" },
+      "outdoor/flower-field": { en: "scrolling through old photos, smiling", zh: "翻看旧照片，看着看着就笑了" },
+      "outdoor/open-field": { en: "going wherever the group chat decides", zh: "群里约去哪儿，就跟着去哪儿" },
+      "outdoor/beach": { en: "a big makan that ends in karaoke", zh: "一大桌人吃饭，吃完再去唱K" },
+      "studio/studio": { en: "a candlelit dinner somewhere with a dress code", zh: "在讲究着装的餐厅，享用烛光晚餐" },
     },
   },
 ];
